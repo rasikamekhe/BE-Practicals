@@ -1,0 +1,350 @@
+CODE:
+
+
+!pip install requests pandas numpy matplotlib seaborn
+
+import requests
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from getpass import getpass
+import matplotlib.dates as mdates
+
+def fetch_and_analyze_weather_data():
+
+    # Step 1: Enter API key
+    API_KEY = getpass("Enter OpenWeatherMap API Key: ")
+
+    city = "Pune"
+    country = "IN"
+
+    url = "https://api.openweathermap.org/data/2.5/forecast"
+
+    params = {
+        "q": f"{city},{country}",
+        "appid": API_KEY,
+        "units": "metric"
+    }
+
+    try:
+        # Step 2: Fetch data from API
+        response = requests.get(url, params=params, timeout=20)
+
+        if response.status_code == 401:
+            print("Invalid API key or API key not activated.")
+            print(response.text)
+            return
+
+        response.raise_for_status()
+
+        data = response.json()
+
+        print("\nAPI Request Successful!")
+        print("City:", data["city"]["name"])
+        print("Country:", data["city"]["country"])
+        print("Latitude:", data["city"]["coord"]["lat"])
+        print("Longitude:", data["city"]["coord"]["lon"])
+
+        # Step 3: Extract weather information
+        records = []
+
+        for item in data["list"]:
+            records.append({
+                "Date": item["dt_txt"],
+                "Temperature": item["main"]["temp"],
+                "Humidity": item["main"]["humidity"],
+                "Wind_Speed": item["wind"]["speed"],
+                "Rainfall": item.get("rain", {}).get("3h", 0),
+                "Weather": item["weather"][0]["description"]
+            })
+
+        # Step 4: Convert into DataFrame
+        weather = pd.DataFrame(records)
+
+        weather["Date"] = pd.to_datetime(weather["Date"])
+
+        numeric_columns = [
+            "Temperature",
+            "Humidity",
+            "Wind_Speed",
+            "Rainfall"
+        ]
+
+        # Step 5: Data cleaning
+        for col in numeric_columns:
+            weather[col] = pd.to_numeric(
+                weather[col], errors="coerce"
+            )
+
+            if col == "Rainfall":
+                weather[col] = weather[col].fillna(0)
+            else:
+                weather[col] = weather[col].fillna(
+                    weather[col].median()
+                )
+
+        weather = weather.dropna(subset=["Date"])
+
+        print("\nRetrieved Weather Data:\n")
+        print(weather.head(10).to_string(index=False))
+
+        print("\nMissing Values:\n")
+        print(weather.isnull().sum())
+
+        # Step 6: Statistical analysis
+        print("\nWeather Statistics:\n")
+        print(weather[numeric_columns].describe())
+
+        print("\nAverage Temperature:",
+              round(weather["Temperature"].mean(), 2), "°C")
+
+        print("Maximum Temperature:",
+              weather["Temperature"].max(), "°C")
+
+        print("Minimum Temperature:",
+              weather["Temperature"].min(), "°C")
+
+        print("Average Humidity:",
+              round(weather["Humidity"].mean(), 2), "%")
+
+        print("Total Rainfall:",
+              round(weather["Rainfall"].sum(), 2), "mm")
+
+        # Step 7: Daily weather aggregation
+        weather["Date_Only"] = weather["Date"].dt.date
+
+        daily_data = weather.groupby("Date_Only").agg({
+            "Temperature": "mean",
+            "Humidity": "mean",
+            "Wind_Speed": "mean",
+            "Rainfall": "sum"
+        }).round(2)
+
+        print("\nDaily Weather Summary:\n")
+        print(daily_data)
+
+        # Step 8: Save data into CSV files
+        weather.to_csv("openweather_data.csv", index=False)
+        daily_data.to_csv("daily_weather_summary.csv")
+
+        print("\nWeather data saved successfully!")
+
+        # Step 9: Visualize weather data
+        fig, axes = plt.subplots(
+            2, 2, figsize=(15, 10),
+            constrained_layout=True
+        )
+
+        # Common date formatting
+        date_locator = mdates.AutoDateLocator()
+        date_formatter = mdates.ConciseDateFormatter(date_locator)
+
+        # Temperature graph
+        axes[0, 0].plot(
+            weather["Date"],
+            weather["Temperature"],
+            marker="o"
+        )
+        axes[0, 0].set_title("Temperature Trend")
+        axes[0, 0].set_xlabel("Date")
+        axes[0, 0].set_ylabel("Temperature (°C)")
+        axes[0, 0].xaxis.set_major_locator(date_locator)
+        axes[0, 0].xaxis.set_major_formatter(date_formatter)
+        axes[0, 0].grid(True, alpha=0.3)
+
+        # Humidity graph
+        axes[0, 1].bar(
+            weather["Date"],
+            weather["Humidity"],
+            width=0.08
+        )
+        axes[0, 1].set_title("Humidity")
+        axes[0, 1].set_xlabel("Date")
+        axes[0, 1].set_ylabel("Humidity (%)")
+        axes[0, 1].xaxis.set_major_locator(date_locator)
+        axes[0, 1].xaxis.set_major_formatter(date_formatter)
+
+        # Wind speed graph
+        axes[1, 0].plot(
+            weather["Date"],
+            weather["Wind_Speed"],
+            marker="o"
+        )
+        axes[1, 0].set_title("Wind Speed")
+        axes[1, 0].set_xlabel("Date")
+        axes[1, 0].set_ylabel("Wind Speed (m/s)")
+        axes[1, 0].xaxis.set_major_locator(date_locator)
+        axes[1, 0].xaxis.set_major_formatter(date_formatter)
+        axes[1, 0].grid(True, alpha=0.3)
+
+        # Rainfall graph
+        axes[1, 1].bar(
+            weather["Date"],
+            weather["Rainfall"],
+            width=0.08
+        )
+        axes[1, 1].set_title("Rainfall")
+        axes[1, 1].set_xlabel("Date")
+        axes[1, 1].set_ylabel("Rainfall (mm)")
+        axes[1, 1].xaxis.set_major_locator(date_locator)
+        axes[1, 1].xaxis.set_major_formatter(date_formatter)
+
+        # Handle zero rainfall
+        if weather["Rainfall"].max() == 0:
+            axes[1, 1].set_ylim(0, 1)
+            axes[1, 1].text(
+                0.5, 0.5,
+                "No rainfall predicted",
+                transform=axes[1, 1].transAxes,
+                ha="center",
+                va="center"
+            )
+
+        plt.suptitle("Weather Data Analysis - Pune", fontsize=16)
+        plt.show()
+
+        # Step 10: Correlation analysis
+        correlation = weather[numeric_columns].corr()
+
+        # Remove constant columns from correlation analysis
+        variable_columns = [
+            col for col in numeric_columns
+            if weather[col].nunique() > 1
+        ]
+
+        print("\nCorrelation Matrix:\n")
+        print(correlation.loc[
+            variable_columns, variable_columns
+        ].round(4))
+
+        # Step 11: Correlation heatmap
+        plt.figure(figsize=(8, 5))
+
+        sns.heatmap(
+            correlation.loc[variable_columns, variable_columns],
+            annot=True,
+            cmap="coolwarm",
+            fmt=".2f",
+            linewidths=0.5
+        )
+
+        plt.title("Weather Correlation Heatmap")
+        plt.tight_layout()
+        plt.show()
+
+        # Display excluded columns, if any
+        excluded_columns = [
+            col for col in numeric_columns
+            if col not in variable_columns
+        ]
+
+        if excluded_columns:
+            print("\nExcluded from correlation analysis:")
+            print(excluded_columns)
+            print("Reason: These columns contain constant values.")
+
+        print("\nWeather Data Analysis Completed Successfully!")
+
+    except requests.exceptions.HTTPError as e:
+        print("HTTP Error:", e)
+        print("Response:", response.text)
+
+    except requests.exceptions.RequestException as e:
+        print("Network Error:", e)
+
+    except (KeyError, ValueError, TypeError) as e:
+        print("Data Processing Error:", e)
+
+
+# Execute program
+fetch_and_analyze_weather_data()
+
+
+
+
+
+OUTPUT:
+
+
+
+
+Enter OpenWeatherMap API Key:      ( fb365aa6104829b44455572365ff3b4e )
+API Request Successful!
+City: Pune
+Country: IN
+Latitude: 18.5196
+Longitude: 73.8553
+
+Retrieved Weather Data:
+
+               Date  Temperature  Humidity  Wind_Speed  Rainfall          Weather
+2026-11-15 12:00:00        27.86        20        0.86         0    broken clouds
+2026-11-15 15:00:00        26.20        24        1.43         0 scattered clouds
+2026-11-15 18:00:00        22.76        34        1.22         0       few clouds
+2026-11-15 21:00:00        18.55        45        1.10         0    broken clouds
+2026-11-16 00:00:00        18.96        47        0.21         0    broken clouds
+2026-11-16 03:00:00        22.17        41        0.75         0  overcast clouds
+2026-11-16 06:00:00        30.46        29        2.40         0  overcast clouds
+2026-11-16 09:00:00        32.18        24        1.19         0 scattered clouds
+2026-11-16 12:00:00        25.96        33        0.99         0 scattered clouds
+2026-11-16 15:00:00        21.82        39        1.79         0 scattered clouds
+
+Missing Values:
+
+Date           0
+Temperature    0
+Humidity       0
+Wind_Speed     0
+Rainfall       0
+Weather        0
+dtype: int64
+
+Weather Statistics:
+
+       Temperature  Humidity  Wind_Speed  Rainfall
+count    40.000000  40.00000   40.000000      40.0
+mean     23.831250  37.57500    1.831000       0.0
+std       4.157374   9.89143    1.255588       0.0
+min      16.560000  17.00000    0.210000       0.0
+25%      20.162500  30.75000    0.990000       0.0
+50%      23.035000  38.00000    1.365000       0.0
+75%      27.702500  45.25000    2.405000       0.0
+max      32.180000  57.00000    5.020000       0.0
+
+Average Temperature: 23.83 °C
+Maximum Temperature: 32.18 °C
+Minimum Temperature: 16.56 °C
+Average Humidity: 37.58 %
+Total Rainfall: 0 mm
+
+Daily Weather Summary:
+
+            Temperature  Humidity  Wind_Speed  Rainfall
+Date_Only                                              
+2026-11-15        23.84     30.75        1.15         0
+2026-11-16        24.16     38.38        1.26         0
+2026-11-17        24.08     37.75        1.24         0
+2026-11-18        24.46     41.50        1.83         0
+2026-11-19        23.21     39.88        2.71         0
+2026-11-20        22.64     30.00        3.09         0
+
+Weather data saved successfully!
+
+
+# o/p img 1 and 2
+
+Correlation Matrix:
+
+             Temperature  Humidity  Wind_Speed
+Temperature       1.0000   -0.8083      0.5135
+Humidity         -0.8083    1.0000     -0.4835
+Wind_Speed        0.5135   -0.4835      1.0000
+
+# o/p img 3
+
+Excluded from correlation analysis:
+['Rainfall']
+Reason: These columns contain constant values.
+
+Weather Data Analysis Completed Successfully!

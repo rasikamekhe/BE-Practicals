@@ -1,0 +1,569 @@
+CODE:
+
+
+pip install pandas numpy matplotlib seaborn requests openpyxl scikit-learn
+
+# Install required libraries separately in terminal:
+# pip install pandas numpy matplotlib openpyxl
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ------------------------------------------------
+# 1. Load the original CSV dataset
+# ------------------------------------------------
+
+file_path = "sales_data_sample.csv"
+
+sales = pd.read_csv(file_path, encoding="cp1252")
+
+print("Dataset Loaded Successfully!")
+
+print("\nFirst Five Rows:")
+print(sales.head())
+
+print("\nDataset Shape:")
+print(sales.shape)
+
+print("\nData Types:")
+print(sales.dtypes)
+
+# ------------------------------------------------
+# 2. Check missing values and duplicates
+# ------------------------------------------------
+
+print("\nMissing Values:")
+print(sales.isnull().sum())
+
+print("\nDuplicate Records:")
+print(sales.duplicated().sum())
+
+# ------------------------------------------------
+# 3. Demonstrate CSV, Excel and JSON formats
+#    Split the original dataset into three parts.
+# ------------------------------------------------
+
+part1 = sales.iloc[:941]
+part2 = sales.iloc[941:1882]
+part3 = sales.iloc[1882:]
+
+# Save data in different formats
+part1.to_csv("sales_csv.csv", index=False)
+part2.to_excel("sales_excel.xlsx", index=False)
+part3.to_json("sales_json.json", orient="records", indent=4)
+
+# Load data from different formats
+csv_data = pd.read_csv("sales_csv.csv", encoding="cp1252")
+excel_data = pd.read_excel("sales_excel.xlsx")
+json_data = pd.read_json("sales_json.json")
+
+print("\nCSV Data:")
+print(csv_data.head())
+
+print("\nExcel Data:")
+print(excel_data.head())
+
+print("\nJSON Data:")
+print(json_data.head())
+
+# ------------------------------------------------
+# 4. Combine the datasets
+# ------------------------------------------------
+
+sales = pd.concat(
+    [csv_data, excel_data, json_data],
+    ignore_index=True
+)
+
+print("\nCombined Dataset Information:")
+sales.info()
+
+print("\nCombined Dataset Shape:")
+print(sales.shape)
+
+# ------------------------------------------------
+# 5. Data Cleaning
+# ------------------------------------------------
+
+# Remove duplicate records
+sales.drop_duplicates(inplace=True)
+
+# Remove extra spaces from column names
+sales.columns = sales.columns.str.strip()
+
+# Clean text columns
+for col in sales.select_dtypes(include="object").columns:
+    sales[col] = sales[col].str.strip()
+
+# Convert numeric columns
+numeric_columns = [
+    "QUANTITYORDERED",
+    "PRICEEACH",
+    "SALES",
+    "MSRP"
+]
+
+for col in numeric_columns:
+    sales[col] = pd.to_numeric(
+        sales[col], errors="coerce"
+    )
+
+# Convert order date into datetime format
+sales["ORDERDATE"] = pd.to_datetime(
+    sales["ORDERDATE"], errors="coerce"
+)
+
+# Fill missing numeric values with median
+for col in numeric_columns:
+    sales[col] = sales[col].fillna(
+        sales[col].median()
+    )
+
+# Fill missing categorical values
+for col in sales.select_dtypes(include="object").columns:
+    sales[col] = sales[col].fillna("Unknown")
+
+# Fill missing dates with the most frequent date
+sales["ORDERDATE"] = sales["ORDERDATE"].fillna(
+    sales["ORDERDATE"].mode()[0]
+)
+
+print("\nCleaned Sales Data:")
+print(sales.head())
+
+print("\nMissing Values After Cleaning:")
+print(sales.isnull().sum())
+
+# ------------------------------------------------
+# 6. Descriptive Statistics
+# ------------------------------------------------
+
+print("\nDescriptive Statistics:")
+print(sales.describe())
+
+# ------------------------------------------------
+# 7. Sales Analysis
+# ------------------------------------------------
+
+print("\nTotal Sales:", sales["SALES"].sum())
+
+print("Average Sales:", sales["SALES"].mean())
+
+# Group sales by product line
+product_sales = sales.groupby(
+    "PRODUCTLINE"
+)["SALES"].sum().sort_values(ascending=False)
+
+print("\nSales by Product Line:")
+print(product_sales)
+
+# Group sales by country
+country_sales = sales.groupby(
+    "COUNTRY"
+)["SALES"].sum().sort_values(ascending=False)
+
+print("\nSales by Country:")
+print(country_sales)
+
+# ------------------------------------------------
+# 8. Data Visualization
+# ------------------------------------------------
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# Bar chart
+product_sales.plot(
+    kind="bar",
+    ax=axes[0],
+    title="Sales by Product Line"
+)
+
+axes[0].set_xlabel("Product Line")
+axes[0].set_ylabel("Total Sales")
+axes[0].tick_params(axis="x", rotation=45)
+
+# Pie chart
+product_sales.plot(
+    kind="pie",
+    autopct="%1.1f%%",
+    ax=axes[1],
+    title="Product Line Sales Distribution"
+)
+
+axes[1].set_ylabel("")
+
+plt.tight_layout()
+plt.show()
+
+# ------------------------------------------------
+# 9. Save the cleaned dataset
+# ------------------------------------------------
+
+sales.to_csv("cleaned_sales_data.csv", index=False)
+
+sales.to_excel("cleaned_sales_data.xlsx", index=False)
+
+print("\nCleaned Sales Data Saved Successfully!")
+
+print("\nSales Data Analysis Completed Successfully!")
+
+
+
+
+OUTPUT:
+
+
+
+
+Dataset Loaded Successfully!
+
+First Five Rows:
+   ORDERNUMBER  QUANTITYORDERED  PRICEEACH  ORDERLINENUMBER    SALES  \
+0        10107               30      95.70                2  2871.00   
+1        10121               34      81.35                5  2765.90   
+2        10134               41      94.74                2  3884.34   
+3        10145               45      83.26                6  3746.70   
+4        10159               49     100.00               14  5205.27   
+
+         ORDERDATE   STATUS  QTR_ID  MONTH_ID  YEAR_ID  ...  \
+0   2/24/2003 0:00  Shipped       1         2     2003  ...   
+1    5/7/2003 0:00  Shipped       2         5     2003  ...   
+2    7/1/2003 0:00  Shipped       3         7     2003  ...   
+3   8/25/2003 0:00  Shipped       3         8     2003  ...   
+4  10/10/2003 0:00  Shipped       4        10     2003  ...   
+
+                    ADDRESSLINE1  ADDRESSLINE2           CITY STATE  \
+0        897 Long Airport Avenue           NaN            NYC    NY   
+1             59 rue de l'Abbaye           NaN          Reims   NaN   
+2  27 rue du Colonel Pierre Avia           NaN          Paris   NaN   
+3             78934 Hillside Dr.           NaN       Pasadena    CA   
+4                7734 Strong St.           NaN  San Francisco    CA   
+
+  POSTALCODE COUNTRY TERRITORY CONTACTLASTNAME CONTACTFIRSTNAME DEALSIZE  
+0      10022     USA       NaN              Yu             Kwai    Small  
+1      51100  France      EMEA         Henriot             Paul    Small  
+2      75508  France      EMEA        Da Cunha           Daniel   Medium  
+3      90003     USA       NaN           Young            Julie   Medium  
+4        NaN     USA       NaN           Brown            Julie   Medium  
+
+[5 rows x 25 columns]
+
+Dataset Shape:
+(2823, 25)
+
+Data Types:
+ORDERNUMBER           int64
+QUANTITYORDERED       int64
+PRICEEACH           float64
+ORDERLINENUMBER       int64
+SALES               float64
+ORDERDATE            object
+STATUS               object
+QTR_ID                int64
+MONTH_ID              int64
+YEAR_ID               int64
+PRODUCTLINE          object
+MSRP                  int64
+PRODUCTCODE          object
+CUSTOMERNAME         object
+PHONE                object
+ADDRESSLINE1         object
+ADDRESSLINE2         object
+CITY                 object
+STATE                object
+POSTALCODE           object
+COUNTRY              object
+TERRITORY            object
+CONTACTLASTNAME      object
+CONTACTFIRSTNAME     object
+DEALSIZE             object
+dtype: object
+
+Missing Values:
+ORDERNUMBER            0
+QUANTITYORDERED        0
+PRICEEACH              0
+ORDERLINENUMBER        0
+SALES                  0
+ORDERDATE              0
+STATUS                 0
+QTR_ID                 0
+MONTH_ID               0
+YEAR_ID                0
+PRODUCTLINE            0
+MSRP                   0
+PRODUCTCODE            0
+CUSTOMERNAME           0
+PHONE                  0
+ADDRESSLINE1           0
+ADDRESSLINE2        2521
+CITY                   0
+STATE               1486
+POSTALCODE            76
+COUNTRY                0
+TERRITORY           1074
+CONTACTLASTNAME        0
+CONTACTFIRSTNAME       0
+DEALSIZE               0
+dtype: int64
+
+Duplicate Records:
+0
+
+CSV Data:
+   ORDERNUMBER  QUANTITYORDERED  PRICEEACH  ORDERLINENUMBER    SALES  \
+0        10107               30      95.70                2  2871.00   
+1        10121               34      81.35                5  2765.90   
+2        10134               41      94.74                2  3884.34   
+3        10145               45      83.26                6  3746.70   
+4        10159               49     100.00               14  5205.27   
+
+         ORDERDATE   STATUS  QTR_ID  MONTH_ID  YEAR_ID  ...  \
+0   2/24/2003 0:00  Shipped       1         2     2003  ...   
+1    5/7/2003 0:00  Shipped       2         5     2003  ...   
+2    7/1/2003 0:00  Shipped       3         7     2003  ...   
+3   8/25/2003 0:00  Shipped       3         8     2003  ...   
+4  10/10/2003 0:00  Shipped       4        10     2003  ...   
+
+                    ADDRESSLINE1  ADDRESSLINE2           CITY STATE  \
+0        897 Long Airport Avenue           NaN            NYC    NY   
+1             59 rue de l'Abbaye           NaN          Reims   NaN   
+2  27 rue du Colonel Pierre Avia           NaN          Paris   NaN   
+3             78934 Hillside Dr.           NaN       Pasadena    CA   
+4                7734 Strong St.           NaN  San Francisco    CA   
+
+  POSTALCODE COUNTRY TERRITORY CONTACTLASTNAME CONTACTFIRSTNAME DEALSIZE  
+0      10022     USA       NaN              Yu             Kwai    Small  
+1      51100  France      EMEA         Henriot             Paul    Small  
+2      75508  France      EMEA        Da Cunha           Daniel   Medium  
+3      90003     USA       NaN           Young            Julie   Medium  
+4        NaN     USA       NaN           Brown            Julie   Medium  
+
+[5 rows x 25 columns]
+
+Excel Data:
+   ORDERNUMBER  QUANTITYORDERED  PRICEEACH  ORDERLINENUMBER    SALES  \
+0        10178               41      81.72               10  3350.52   
+1        10186               32      89.46                7  2862.72   
+2        10197               46      87.74                4  4036.04   
+3        10209               28     100.00                6  2817.92   
+4        10222               49      94.62               10  4636.38   
+
+         ORDERDATE   STATUS  QTR_ID  MONTH_ID  YEAR_ID  ...  \
+0   11/8/2003 0:00  Shipped       4        11     2003  ...   
+1  11/14/2003 0:00  Shipped       4        11     2003  ...   
+2  11/26/2003 0:00  Shipped       4        11     2003  ...   
+3    1/9/2004 0:00  Shipped       1         1     2004  ...   
+4   2/19/2004 0:00  Shipped       1         2     2004  ...   
+
+             ADDRESSLINE1  ADDRESSLINE2         CITY STATE POSTALCODE COUNTRY  \
+0   1 rue Alsace-Lorraine           NaN     Toulouse   NaN      31000  France   
+1         120 Hanover Sq.           NaN       London   NaN    WA1 1DP      UK   
+2  Rambla de Catalu¤a, 23           NaN    Barcelona   NaN       8022   Spain   
+3        6047 Douglas Av.           NaN  Los Angeles    CA        NaN     USA   
+4        361 Furth Circle           NaN    San Diego    CA      91217     USA   
+
+  TERRITORY CONTACTLASTNAME CONTACTFIRSTNAME DEALSIZE  
+0      EMEA          Roulet          Annette   Medium  
+1      EMEA           Hardy           Thomas    Small  
+2      EMEA        Saavedra          Eduardo   Medium  
+3       NaN        Chandler          Michael    Small  
+4       NaN        Thompson          Valarie   Medium  
+
+[5 rows x 25 columns]
+
+JSON Data:
+   ORDERNUMBER  QUANTITYORDERED  PRICEEACH  ORDERLINENUMBER    SALES  \
+0        10276               20      61.23                2  1224.60   
+1        10287               20      67.97               11  1359.40   
+2        10300               31      58.78                4  1822.18   
+3        10310               38      56.94                9  2163.72   
+4        10320               26      61.23                2  1591.98   
+
+         ORDERDATE   STATUS  QTR_ID  MONTH_ID  YEAR_ID  ...  \
+0    8/2/2004 0:00  Shipped       3         8     2004  ...   
+1   8/30/2004 0:00  Shipped       3         8     2004  ...   
+2   10/4/2003 0:00  Shipped       4        10     2003  ...   
+3  10/16/2004 0:00  Shipped       4        10     2004  ...   
+4   11/3/2004 0:00  Shipped       4        11     2004  ...   
+
+         ADDRESSLINE1  ADDRESSLINE2        CITY STATE POSTALCODE      COUNTRY  \
+0  7635 Spinnaker Dr.          None  Brickhaven    MA      58339          USA   
+1   Grenzacherweg 237          None      Gensve  None       1203  Switzerland   
+2       Lyonerstr. 34          None   Frankfurt  None      60528      Germany   
+3  Mehrheimerstr. 369          None        Koln  None      50739      Germany   
+4     Berguvsv„gen  8          None        Lule  None   S-958 22       Sweden   
+
+  TERRITORY CONTACTLASTNAME CONTACTFIRSTNAME DEALSIZE  
+0      None         Barajas           Miguel    Small  
+1      EMEA            Holz          Michael    Small  
+2      EMEA          Keitel           Roland    Small  
+3      EMEA       Pfalzheim        Henriette    Small  
+4      EMEA        Berglund        Christina    Small  
+
+[5 rows x 25 columns]
+
+Combined Dataset Information:
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 2823 entries, 0 to 2822
+Data columns (total 25 columns):
+ #   Column            Non-Null Count  Dtype  
+---  ------            --------------  -----  
+ 0   ORDERNUMBER       2823 non-null   int64  
+ 1   QUANTITYORDERED   2823 non-null   int64  
+ 2   PRICEEACH         2823 non-null   float64
+ 3   ORDERLINENUMBER   2823 non-null   int64  
+ 4   SALES             2823 non-null   float64
+ 5   ORDERDATE         2823 non-null   object 
+ 6   STATUS            2823 non-null   object 
+ 7   QTR_ID            2823 non-null   int64  
+ 8   MONTH_ID          2823 non-null   int64  
+ 9   YEAR_ID           2823 non-null   int64  
+ 10  PRODUCTLINE       2823 non-null   object 
+ 11  MSRP              2823 non-null   int64  
+ 12  PRODUCTCODE       2823 non-null   object 
+ 13  CUSTOMERNAME      2823 non-null   object 
+ 14  PHONE             2823 non-null   object 
+ 15  ADDRESSLINE1      2823 non-null   object 
+ 16  ADDRESSLINE2      302 non-null    object 
+ 17  CITY              2823 non-null   object 
+ 18  STATE             1337 non-null   object 
+ 19  POSTALCODE        2747 non-null   object 
+ 20  COUNTRY           2823 non-null   object 
+ 21  TERRITORY         1749 non-null   object 
+ 22  CONTACTLASTNAME   2823 non-null   object 
+ 23  CONTACTFIRSTNAME  2823 non-null   object 
+ 24  DEALSIZE          2823 non-null   object 
+dtypes: float64(2), int64(7), object(16)
+memory usage: 551.5+ KB
+
+Combined Dataset Shape:
+(2823, 25)
+
+Cleaned Sales Data:
+   ORDERNUMBER  QUANTITYORDERED  PRICEEACH  ORDERLINENUMBER    SALES  \
+0        10107               30      95.70                2  2871.00   
+1        10121               34      81.35                5  2765.90   
+2        10134               41      94.74                2  3884.34   
+3        10145               45      83.26                6  3746.70   
+4        10159               49     100.00               14  5205.27   
+
+   ORDERDATE   STATUS  QTR_ID  MONTH_ID  YEAR_ID  ...  \
+0 2003-02-24  Shipped       1         2     2003  ...   
+1 2003-05-07  Shipped       2         5     2003  ...   
+2 2003-07-01  Shipped       3         7     2003  ...   
+3 2003-08-25  Shipped       3         8     2003  ...   
+4 2003-10-10  Shipped       4        10     2003  ...   
+
+                    ADDRESSLINE1  ADDRESSLINE2           CITY    STATE  \
+0        897 Long Airport Avenue       Unknown            NYC       NY   
+1             59 rue de l'Abbaye       Unknown          Reims  Unknown   
+2  27 rue du Colonel Pierre Avia       Unknown          Paris  Unknown   
+3             78934 Hillside Dr.       Unknown       Pasadena       CA   
+4                7734 Strong St.       Unknown  San Francisco       CA   
+
+  POSTALCODE COUNTRY TERRITORY CONTACTLASTNAME CONTACTFIRSTNAME DEALSIZE  
+0      10022     USA   Unknown              Yu             Kwai    Small  
+1      51100  France      EMEA         Henriot             Paul    Small  
+2      75508  France      EMEA        Da Cunha           Daniel   Medium  
+3      90003     USA   Unknown           Young            Julie   Medium  
+4    Unknown     USA   Unknown           Brown            Julie   Medium  
+
+[5 rows x 25 columns]
+
+Missing Values After Cleaning:
+ORDERNUMBER         0
+QUANTITYORDERED     0
+PRICEEACH           0
+ORDERLINENUMBER     0
+SALES               0
+ORDERDATE           0
+STATUS              0
+QTR_ID              0
+MONTH_ID            0
+YEAR_ID             0
+PRODUCTLINE         0
+MSRP                0
+PRODUCTCODE         0
+CUSTOMERNAME        0
+PHONE               0
+ADDRESSLINE1        0
+ADDRESSLINE2        0
+CITY                0
+STATE               0
+POSTALCODE          0
+COUNTRY             0
+TERRITORY           0
+CONTACTLASTNAME     0
+CONTACTFIRSTNAME    0
+DEALSIZE            0
+dtype: int64
+
+Descriptive Statistics:
+        ORDERNUMBER  QUANTITYORDERED    PRICEEACH  ORDERLINENUMBER  \
+count   2823.000000      2823.000000  2823.000000      2823.000000   
+mean   10258.725115        35.092809    83.658544         6.466171   
+min    10100.000000         6.000000    26.880000         1.000000   
+25%    10180.000000        27.000000    68.860000         3.000000   
+50%    10262.000000        35.000000    95.700000         6.000000   
+75%    10333.500000        43.000000   100.000000         9.000000   
+max    10425.000000        97.000000   100.000000        18.000000   
+std       92.085478         9.741443    20.174277         4.225841   
+
+              SALES                      ORDERDATE       QTR_ID     MONTH_ID  \
+count   2823.000000                           2823  2823.000000  2823.000000   
+mean    3553.889072  2004-05-11 00:16:49.989373056     2.717676     7.092455   
+min      482.130000            2003-01-06 00:00:00     1.000000     1.000000   
+25%     2203.430000            2003-11-06 12:00:00     2.000000     4.000000   
+50%     3184.800000            2004-06-15 00:00:00     3.000000     8.000000   
+75%     4508.000000            2004-11-17 12:00:00     4.000000    11.000000   
+max    14082.800000            2005-05-31 00:00:00     4.000000    12.000000   
+std     1841.865106                            NaN     1.203878     3.656633   
+
+          YEAR_ID         MSRP  
+count  2823.00000  2823.000000  
+mean   2003.81509   100.715551  
+min    2003.00000    33.000000  
+25%    2003.00000    68.000000  
+50%    2004.00000    99.000000  
+75%    2004.00000   124.000000  
+max    2005.00000   214.000000  
+std       0.69967    40.187912  
+
+Total Sales: 10032628.85
+Average Sales: 3553.889071909316
+
+Sales by Product Line:
+PRODUCTLINE
+Classic Cars        3919615.66
+Vintage Cars        1903150.84
+Motorcycles         1166388.34
+Trucks and Buses    1127789.84
+Planes               975003.57
+Ships                714437.13
+Trains               226243.47
+Name: SALES, dtype: float64
+
+Sales by Country:
+COUNTRY
+USA            3627982.83
+Spain          1215686.92
+France         1110916.52
+Australia       630623.10
+UK              478880.46
+Italy           374674.31
+Finland         329581.91
+Norway          307463.70
+Singapore       288488.41
+Denmark         245637.15
+Canada          224078.56
+Germany         220472.09
+Sweden          210014.21
+Austria         202062.53
+Japan           188167.81
+Switzerland     117713.56
+Belgium         108412.62
+Philippines      94015.73
+Ireland          57756.43
+Name: SALES, dtype: float64

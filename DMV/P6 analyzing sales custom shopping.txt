@@ -1,0 +1,487 @@
+
+# Practical 6: Data Aggregation
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --------------------------------------------------
+# 1. LOAD DATASET
+# --------------------------------------------------
+
+data = pd.read_csv("customer_shopping_data.csv")
+
+print("Dataset loaded successfully!")
+print("\nDataset Shape:", data.shape)
+
+print("\nFirst 5 Records:")
+print(data.head())
+
+print("\nDataset Information:")
+data.info()
+
+print("\nStatistical Summary:")
+print(data.describe())
+
+print("\nColumn Names:")
+print(data.columns.tolist())
+
+
+# --------------------------------------------------
+# 2. CHECK MISSING VALUES AND DUPLICATES
+# --------------------------------------------------
+
+print("\nMissing Values:")
+print(data.isnull().sum())
+
+print("\nDuplicate Records Before Removal:")
+print(data.duplicated().sum())
+
+data.drop_duplicates(inplace=True)
+
+print("\nDuplicate Records After Removal:")
+print(data.duplicated().sum())
+
+
+# --------------------------------------------------
+# 3. DATA CLEANING AND PREPARATION
+# --------------------------------------------------
+
+# Convert numeric columns
+data["quantity"] = pd.to_numeric(data["quantity"], errors="coerce")
+data["price"] = pd.to_numeric(data["price"], errors="coerce")
+data["age"] = pd.to_numeric(data["age"], errors="coerce")
+
+# Remove records with missing essential values
+data.dropna(
+    subset=["quantity", "price", "category",
+            "shopping_mall", "payment_method", "invoice_date"],
+    inplace=True
+)
+
+# Fill missing age values with median
+data["age"] = data["age"].fillna(data["age"].median())
+
+# Convert invoice_date into datetime format
+data["invoice_date"] = pd.to_datetime(
+    data["invoice_date"],
+    dayfirst=True,
+    errors="coerce"
+)
+
+# Remove records with invalid dates
+data.dropna(subset=["invoice_date"], inplace=True)
+
+print("\nMissing Values After Treatment:")
+print(data.isnull().sum().sum())
+
+print("\nCleaned Dataset Shape:", data.shape)
+
+
+# --------------------------------------------------
+# 4. CALCULATE SALES AMOUNT
+# --------------------------------------------------
+
+data["sales_amount"] = data["quantity"] * data["price"]
+
+print("\nSales Amount Calculated Successfully!")
+
+print("\nUpdated Dataset:")
+print(data.head())
+
+
+# --------------------------------------------------
+# 5. EXTRACT MONTH AND YEAR
+# --------------------------------------------------
+
+data["month"] = data["invoice_date"].dt.to_period("M").astype(str)
+
+print("\nUpdated Dataset with Month:")
+print(data[["invoice_date", "month"]].head())
+
+
+# --------------------------------------------------
+# 6. AGGREGATION BY PRODUCT CATEGORY
+# --------------------------------------------------
+
+category_sales = data.groupby("category").agg(
+    total_sales=("sales_amount", "sum"),
+    total_quantity=("quantity", "sum"),
+    total_transactions=("invoice_no", "count")
+).sort_values(by="total_sales", ascending=False)
+
+print("\nTotal Sales by Product Category:")
+print(category_sales)
+
+
+# --------------------------------------------------
+# 7. AGGREGATION BY SHOPPING MALL
+# --------------------------------------------------
+
+mall_sales = data.groupby("shopping_mall").agg(
+    total_sales=("sales_amount", "sum"),
+    total_quantity=("quantity", "sum")
+).sort_values(by="total_sales", ascending=False)
+
+print("\nTotal Sales by Shopping Mall:")
+print(mall_sales)
+
+
+# --------------------------------------------------
+# 8. AGGREGATION BY PAYMENT METHOD
+# --------------------------------------------------
+
+payment_sales = data.groupby("payment_method")["sales_amount"].sum()
+
+print("\nSales by Payment Method:")
+print(payment_sales)
+
+
+# --------------------------------------------------
+# 9. MONTHLY SALES AGGREGATION
+# --------------------------------------------------
+
+monthly_sales = data.groupby("month")["sales_amount"].sum()
+
+print("\nMonthly Sales:")
+print(monthly_sales)
+
+
+# --------------------------------------------------
+# 10. PIVOT TABLE: SHOPPING MALL VS CATEGORY
+# --------------------------------------------------
+
+pivot_table = pd.pivot_table(
+    data,
+    values="sales_amount",
+    index="shopping_mall",
+    columns="category",
+    aggfunc="sum",
+    fill_value=0
+)
+
+print("\nPivot Table (Shopping Mall vs Category):")
+print(pivot_table)
+
+
+# --------------------------------------------------
+# 11. CUSTOMER GENDER-WISE SALES
+# --------------------------------------------------
+
+gender_sales = data.groupby("gender")["sales_amount"].sum()
+
+print("\nGender-wise Sales:")
+print(gender_sales)
+
+
+# --------------------------------------------------
+# 12. DISPLAY TOP CATEGORY AND TOP MALL
+# --------------------------------------------------
+
+top_category = category_sales["total_sales"].idxmax()
+top_mall = mall_sales["total_sales"].idxmax()
+
+total_revenue = data["sales_amount"].sum()
+
+print("\nTop Selling Category:", top_category)
+print("Top Performing Shopping Mall:", top_mall)
+print("Total Revenue: {:.2f}".format(total_revenue))
+
+
+# --------------------------------------------------
+# 13. VISUALIZATION
+# --------------------------------------------------
+
+# A. Sales by Product Category
+plt.figure(figsize=(10, 5))
+category_sales["total_sales"].plot(kind="bar")
+plt.title("Total Sales by Product Category")
+plt.xlabel("Product Category")
+plt.ylabel("Total Sales")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+
+# B. Sales by Shopping Mall
+plt.figure(figsize=(12, 5))
+mall_sales["total_sales"].plot(kind="bar")
+plt.title("Total Sales by Shopping Mall")
+plt.xlabel("Shopping Mall")
+plt.ylabel("Total Sales")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+
+# C. Payment Method Sales Distribution
+plt.figure(figsize=(7, 7))
+payment_sales.plot(
+    kind="pie",
+    autopct="%1.1f%%",
+    startangle=90
+)
+plt.title("Sales Distribution by Payment Method")
+plt.ylabel("")
+plt.tight_layout()
+plt.show()
+
+
+# D. Monthly Sales Trend
+plt.figure(figsize=(12, 5))
+monthly_sales.plot(kind="line", marker="o")
+plt.title("Monthly Sales Trend")
+plt.xlabel("Month")
+plt.ylabel("Total Sales")
+plt.xticks(rotation=45)
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+
+# E. Gender-wise Sales
+plt.figure(figsize=(7, 5))
+gender_sales.plot(kind="bar")
+plt.title("Gender-wise Sales")
+plt.xlabel("Gender")
+plt.ylabel("Total Sales")
+plt.xticks(rotation=0)
+plt.tight_layout()
+plt.show()
+
+
+# --------------------------------------------------
+# 14. EXPORT AGGREGATED DATA
+# --------------------------------------------------
+
+category_sales.to_csv("category_sales.csv")
+mall_sales.to_csv("mall_sales.csv")
+payment_sales.to_csv("payment_sales.csv")
+monthly_sales.to_csv("monthly_sales.csv")
+pivot_table.to_csv("mall_category_pivot.csv")
+
+# Export cleaned dataset
+data.to_csv("cleaned_customer_shopping_data.csv", index=False)
+
+print("\nAll aggregated files exported successfully!")
+
+print("\nPractical 6 Completed Successfully!")
+
+
+
+
+
+OUTPUT:
+
+
+
+Dataset loaded successfully!
+
+Dataset Shape: (99457, 10)
+
+First 5 Records:
+  invoice_no customer_id  gender  age  category  quantity    price  \
+0    I138884     C241288  Female   28  Clothing         5  1500.40   
+1    I317333     C111565    Male   21     Shoes         3  1800.51   
+2    I127801     C266599    Male   20  Clothing         1   300.08   
+3    I173702     C988172  Female   66     Shoes         5  3000.85   
+4    I337046     C189076  Female   53     Books         4    60.60   
+
+  payment_method invoice_date   shopping_mall  
+0    Credit Card     5/8/2022          Kanyon  
+1     Debit Card   12/12/2021  Forum Istanbul  
+2           Cash    9/11/2021       Metrocity  
+3    Credit Card   16/05/2021    Metropol AVM  
+4           Cash   24/10/2021          Kanyon  
+
+Dataset Information:
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 99457 entries, 0 to 99456
+Data columns (total 10 columns):
+ #   Column          Non-Null Count  Dtype  
+---  ------          --------------  -----  
+ 0   invoice_no      99457 non-null  object 
+ 1   customer_id     99457 non-null  object 
+ 2   gender          99457 non-null  object 
+ 3   age             99457 non-null  int64  
+ 4   category        99457 non-null  object 
+ 5   quantity        99457 non-null  int64  
+ 6   price           99457 non-null  float64
+ 7   payment_method  99457 non-null  object 
+ 8   invoice_date    99457 non-null  object 
+ 9   shopping_mall   99457 non-null  object 
+dtypes: float64(1), int64(2), object(7)
+memory usage: 7.6+ MB
+
+Statistical Summary:
+                age      quantity         price
+count  99457.000000  99457.000000  99457.000000
+mean      43.427089      3.003429    689.256321
+std       14.990054      1.413025    941.184567
+min       18.000000      1.000000      5.230000
+25%       30.000000      2.000000     45.450000
+50%       43.000000      3.000000    203.300000
+75%       56.000000      4.000000   1200.320000
+max       69.000000      5.000000   5250.000000
+
+Column Names:
+['invoice_no', 'customer_id', 'gender', 'age', 'category', 'quantity', 'price', 'payment_method', 'invoice_date', 'shopping_mall']
+
+Missing Values:
+invoice_no        0
+customer_id       0
+gender            0
+age               0
+category          0
+quantity          0
+price             0
+payment_method    0
+invoice_date      0
+shopping_mall     0
+dtype: int64
+
+Duplicate Records Before Removal:
+0
+
+Duplicate Records After Removal:
+0
+
+Missing Values After Treatment:
+0
+
+Cleaned Dataset Shape: (99457, 10)
+
+Sales Amount Calculated Successfully!
+
+Updated Dataset:
+  invoice_no customer_id  gender  age  category  quantity    price  \
+0    I138884     C241288  Female   28  Clothing         5  1500.40   
+1    I317333     C111565    Male   21     Shoes         3  1800.51   
+2    I127801     C266599    Male   20  Clothing         1   300.08   
+3    I173702     C988172  Female   66     Shoes         5  3000.85   
+4    I337046     C189076  Female   53     Books         4    60.60   
+
+  payment_method invoice_date   shopping_mall  sales_amount  
+0    Credit Card   2022-08-05          Kanyon       7502.00  
+1     Debit Card   2021-12-12  Forum Istanbul       5401.53  
+2           Cash   2021-11-09       Metrocity        300.08  
+3    Credit Card   2021-05-16    Metropol AVM      15004.25  
+4           Cash   2021-10-24          Kanyon        242.40  
+
+Updated Dataset with Month:
+  invoice_date    month
+0   2022-08-05  2022-08
+1   2021-12-12  2021-12
+2   2021-11-09  2021-11
+3   2021-05-16  2021-05
+4   2021-10-24  2021-10
+
+Total Sales by Product Category:
+                  total_sales  total_quantity  total_transactions
+category                                                         
+Clothing         1.139968e+08          103558               34487
+Shoes            6.655345e+07           30217               10034
+Technology       5.786235e+07           15021                4996
+Cosmetics        6.792863e+06           45465               15097
+Toys             3.980426e+06           30321               10087
+Food & Beverage  8.495351e+05           44277               14776
+Books            8.345529e+05           14982                4981
+Souvenir         6.358247e+05           14871                4999
+
+Total Sales by Shopping Mall:
+                   total_sales  total_quantity
+shopping_mall                                 
+Mall of Istanbul   50872481.68           60114
+Kanyon             50554231.10           59457
+Metrocity          37302787.33           44894
+Metropol AVM       25379913.19           30530
+Istinye Park       24618827.68           29465
+Zorlu Center       12901053.82           15234
+Cevahir AVM        12645138.20           14949
+Viaport Outlet     12521339.72           14716
+Emaar Square Mall  12406100.29           14501
+Forum Istanbul     12303921.24           14852
+
+Sales by Payment Method:
+payment_method
+Cash           1.128322e+08
+Credit Card    8.807712e+07
+Debit Card     5.059643e+07
+Name: sales_amount, dtype: float64
+
+Monthly Sales:
+month
+2021-01     9641614.62
+2021-02     8772315.22
+2021-03     9455359.38
+2021-04     9389541.54
+2021-05     9771756.97
+2021-06     9286271.35
+2021-07    10311119.68
+2021-08     9630655.70
+2021-09     9188165.62
+2021-10    10263015.06
+2021-11     9265555.29
+2021-12     9585200.16
+2022-01     9764311.14
+2022-02     8344111.92
+2022-03     9986685.16
+2022-04     9326144.44
+2022-05     9947574.13
+2022-06     9647503.95
+2022-07    10067602.95
+2022-08     9651705.59
+2022-09     9607629.29
+2022-10    10282075.37
+2022-11     8941584.66
+2022-12     9869885.48
+2023-01     9485599.83
+2023-02     9508662.96
+2023-03     2514146.79
+Name: sales_amount, dtype: float64
+
+Pivot Table (Shopping Mall vs Category):
+category               Books     Clothing   Cosmetics  Food & Beverage  \
+shopping_mall                                                            
+Cevahir AVM         44541.00   5706321.28   321214.00         44010.45   
+Emaar Square Mall   41995.80   5590490.40   338941.76         40610.95   
+Forum Istanbul      42056.40   5792444.24   353172.76         39162.24   
+Istinye Park        76083.30  11253900.24   655357.88         85918.44   
+Kanyon             163029.15  22609527.60  1369550.78        166497.05   
+Mall of Istanbul   172240.35  22947417.68  1367517.78        171177.90   
+Metrocity          125911.65  17226692.56   991860.04        129902.74   
+Metropol AVM        83718.90  11568084.00   680770.38         88638.04   
+Viaport Outlet      39632.40   5604594.16   347439.70         41662.18   
+Zorlu Center        45343.95   5697318.88   367037.82         41955.06   
+
+category                 Shoes   Souvenir  Technology       Toys  
+shopping_mall                                                     
+Cevahir AVM         3243918.85   29723.82   3051300.0  204108.80  
+Emaar Square Mall   3089675.16   30943.74   3094350.0  179092.48  
+Forum Istanbul      3327942.65   32879.19   2516850.0  199413.76  
+Istinye Park        6641481.22   68925.48   5436900.0  400261.12  
+Kanyon             13383190.83  127399.53  11944800.0  790236.16  
+Mall of Istanbul   13467814.80  127540.29  11828250.0  790522.88  
+Metrocity           9519296.37   94227.09   8608950.0  605946.88  
+Metropol AVM        7149825.21   67869.78   5327700.0  413306.88  
+Viaport Outlet      3194704.91   27319.17   3066000.0  199987.20  
+Zorlu Center        3535601.47   28996.56   2987250.0  197550.08  
+
+Gender-wise Sales:
+gender
+Female    1.502071e+08
+Male      1.012987e+08
+Name: sales_amount, dtype: float64
+
+Top Selling Category: Clothing
+Top Performing Shopping Mall: Mall of Istanbul
+Total Revenue: 251505794.25
+
+
+
+
+
+
+All aggregated files exported successfully!
+
+Practical 6 Completed Successfully!

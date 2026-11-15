@@ -1,0 +1,442 @@
+
+# PRACTICAL 5: DATA VISUALIZATION USING MATPLOTLIB
+# Air Quality Analysis
+
+# 1. Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 2. Load Dataset
+data = pd.read_csv("City_Air_Quality.csv", sep=";")
+
+print("Dataset Loaded Successfully!")
+
+# 3. Remove Empty Columns and Rows
+data = data.dropna(axis=1, how="all")
+data = data.dropna(how="all")
+
+# Remove extra spaces from column names
+data.columns = data.columns.str.strip()
+
+# 4. Explore Dataset
+print("\nFirst 5 Records:")
+print(data.head())
+
+print("\nDataset Shape:")
+print(data.shape)
+
+print("\nDataset Information:")
+data.info()
+
+print("\nMissing Values:")
+print(data.isnull().sum())
+
+print("\nStatistical Summary:")
+print(data.describe())
+
+
+# 5. Clean and Prepare Data
+
+# Replace decimal commas with decimal points
+numeric_cols = data.columns.drop(["Date", "Time"])
+
+for col in numeric_cols:
+    data[col] = pd.to_numeric(
+        data[col].astype(str).str.replace(",", ".", regex=False),
+        errors="coerce"
+    )
+
+# Replace -200 with NaN (missing values)
+data.replace(-200, np.nan, inplace=True)
+
+# Combine Date and Time columns
+data["DateTime"] = pd.to_datetime(
+    data["Date"] + " " + data["Time"],
+    format="%d/%m/%Y %H.%M.%S",
+    errors="coerce"
+)
+
+# Remove invalid dates
+data.dropna(subset=["DateTime"], inplace=True)
+
+# Sort records by date and time
+data.sort_values("DateTime", inplace=True)
+
+# Fill missing numeric values with median
+for col in numeric_cols:
+    data[col] = data[col].fillna(data[col].median())
+
+print("\nMissing Values After Cleaning:")
+print(data.isnull().sum())
+
+print("\nData Types After Cleaning:")
+print(data.dtypes)
+
+
+# 6. Select Important Pollutants
+pollutants = [
+    "CO(GT)",
+    "NMHC(GT)",
+    "C6H6(GT)",
+    "NOx(GT)",
+    "NO2(GT)"
+]
+
+# 7. Visualize CO Trend Over Time
+plt.figure(figsize=(10, 5))
+
+plt.plot(
+    data["DateTime"],
+    data["CO(GT)"],
+    color="blue",
+    label="CO"
+)
+
+plt.title("Carbon Monoxide (CO) Trend Over Time")
+plt.xlabel("Date")
+plt.ylabel("CO Concentration")
+plt.legend()
+plt.xticks(rotation=45)
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# 8. Visualize Individual Pollutant Trends
+for pollutant in pollutants:
+
+    plt.figure(figsize=(10, 4))
+
+    plt.plot(
+        data["DateTime"],
+        data[pollutant],
+        label=pollutant
+    )
+
+    plt.title(pollutant + " Trend Over Time")
+    plt.xlabel("Date")
+    plt.ylabel("Concentration")
+    plt.legend()
+    plt.xticks(rotation=45)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+# 9. Bar Chart: Average Pollutant Concentrations
+average_values = data[pollutants].mean()
+
+plt.figure(figsize=(9, 5))
+
+plt.bar(
+    average_values.index,
+    average_values.values,
+    color="skyblue"
+)
+
+plt.title("Average Pollutant Concentrations")
+plt.xlabel("Pollutants")
+plt.ylabel("Average Concentration")
+plt.xticks(rotation=30)
+plt.tight_layout()
+plt.show()
+
+# 10. Box Plot: Pollutant Distribution
+plt.figure(figsize=(10, 5))
+
+plt.boxplot(
+    [data[col] for col in pollutants],
+    tick_labels=pollutants
+)
+
+plt.title("Distribution of Air Pollutants")
+plt.xlabel("Pollutants")
+plt.ylabel("Concentration")
+plt.xticks(rotation=30)
+plt.grid(axis="y")
+plt.tight_layout()
+plt.show()
+
+# 11. Scatter Plot: CO vs NO2
+plt.figure(figsize=(7, 5))
+
+plt.scatter(
+    data["CO(GT)"],
+    data["NO2(GT)"],
+    color="green",
+    alpha=0.5
+)
+
+plt.title("CO vs NO2 Concentration")
+plt.xlabel("CO Concentration")
+plt.ylabel("NO2 Concentration")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# 12. Scatter Plot: NOx vs NO2
+plt.figure(figsize=(7, 5))
+
+plt.scatter(
+    data["NOx(GT)"],
+    data["NO2(GT)"],
+    color="orange",
+    alpha=0.5
+)
+
+plt.title("NOx vs NO2 Concentration")
+plt.xlabel("NOx Concentration")
+plt.ylabel("NO2 Concentration")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# 13. Correlation Heatmap
+plt.figure(figsize=(10, 6))
+
+sns.heatmap(
+    data[pollutants].corr(),
+    annot=True,
+    cmap="coolwarm",
+    fmt=".2f"
+)
+
+plt.title("Correlation Between Air Pollutants")
+plt.tight_layout()
+plt.show()
+
+# 14. Monthly Average Pollutant Analysis
+data["Month"] = data["DateTime"].dt.month
+
+monthly_data = data.groupby("Month")[pollutants].mean()
+
+print("\nMonthly Average Pollutant Values:")
+print(monthly_data)
+
+monthly_data.plot(
+    kind="line",
+    figsize=(10, 5),
+    marker="o"
+)
+
+plt.title("Monthly Average Pollutant Trends")
+plt.xlabel("Month")
+plt.ylabel("Average Concentration")
+plt.legend(title="Pollutants")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# 15. Save Cleaned Dataset
+data.to_csv(
+    "Cleaned_City_Air_Quality.csv",
+    index=False
+)
+
+# 16. Final Results
+print("\nFinal Dataset Shape:")
+print(data.shape)
+
+print("\nRemaining Missing Values:")
+print(data.isnull().sum().sum())
+
+print("\nFinal Dataset:")
+print(data.head())
+
+print("\nAir Quality Data Visualization Completed Successfully!")
+
+
+
+
+
+OUTPUT:
+
+
+
+
+
+Dataset Loaded Successfully!
+
+First 5 Records:
+         Date      Time CO(GT)  PT08.S1(CO)  NMHC(GT) C6H6(GT)  PT08.S2(NMHC)  \
+0  10/03/2004  18.00.00    2,6       1360.0     150.0     11,9         1046.0   
+1  10/03/2004  19.00.00      2       1292.0     112.0      9,4          955.0   
+2  10/03/2004  20.00.00    2,2       1402.0      88.0      9,0          939.0   
+3  10/03/2004  21.00.00    2,2       1376.0      80.0      9,2          948.0   
+4  10/03/2004  22.00.00    1,6       1272.0      51.0      6,5          836.0   
+
+   NOx(GT)  PT08.S3(NOx)  NO2(GT)  PT08.S4(NO2)  PT08.S5(O3)     T    RH  \
+0    166.0        1056.0    113.0        1692.0       1268.0  13,6  48,9   
+1    103.0        1174.0     92.0        1559.0        972.0  13,3  47,7   
+2    131.0        1140.0    114.0        1555.0       1074.0  11,9  54,0   
+3    172.0        1092.0    122.0        1584.0       1203.0  11,0  60,0   
+4    131.0        1205.0    116.0        1490.0       1110.0  11,2  59,6   
+
+       AH  
+0  0,7578  
+1  0,7255  
+2  0,7502  
+3  0,7867  
+4  0,7888  
+
+Dataset Shape:
+(9357, 15)
+
+Dataset Information:
+<class 'pandas.core.frame.DataFrame'>
+Index: 9357 entries, 0 to 9356
+Data columns (total 15 columns):
+ #   Column         Non-Null Count  Dtype  
+---  ------         --------------  -----  
+ 0   Date           9357 non-null   object 
+ 1   Time           9357 non-null   object 
+ 2   CO(GT)         9357 non-null   object 
+ 3   PT08.S1(CO)    9357 non-null   float64
+ 4   NMHC(GT)       9357 non-null   float64
+ 5   C6H6(GT)       9357 non-null   object 
+ 6   PT08.S2(NMHC)  9357 non-null   float64
+ 7   NOx(GT)        9357 non-null   float64
+ 8   PT08.S3(NOx)   9357 non-null   float64
+ 9   NO2(GT)        9357 non-null   float64
+ 10  PT08.S4(NO2)   9357 non-null   float64
+ 11  PT08.S5(O3)    9357 non-null   float64
+ 12  T              9357 non-null   object 
+ 13  RH             9357 non-null   object 
+ 14  AH             9357 non-null   object 
+dtypes: float64(8), object(7)
+memory usage: 1.1+ MB
+
+Missing Values:
+Date             0
+Time             0
+CO(GT)           0
+PT08.S1(CO)      0
+NMHC(GT)         0
+C6H6(GT)         0
+PT08.S2(NMHC)    0
+NOx(GT)          0
+PT08.S3(NOx)     0
+NO2(GT)          0
+PT08.S4(NO2)     0
+PT08.S5(O3)      0
+T                0
+RH               0
+AH               0
+dtype: int64
+
+Statistical Summary:
+       PT08.S1(CO)     NMHC(GT)  PT08.S2(NMHC)      NOx(GT)  PT08.S3(NOx)  \
+count  9357.000000  9357.000000    9357.000000  9357.000000   9357.000000   
+mean   1048.990061  -159.090093     894.595276   168.616971    794.990168   
+std     329.832710   139.789093     342.333252   257.433866    321.993552   
+min    -200.000000  -200.000000    -200.000000  -200.000000   -200.000000   
+25%     921.000000  -200.000000     711.000000    50.000000    637.000000   
+50%    1053.000000  -200.000000     895.000000   141.000000    794.000000   
+75%    1221.000000  -200.000000    1105.000000   284.000000    960.000000   
+max    2040.000000  1189.000000    2214.000000  1479.000000   2683.000000   
+
+           NO2(GT)  PT08.S4(NO2)  PT08.S5(O3)  
+count  9357.000000   9357.000000  9357.000000  
+mean     58.148873   1391.479641   975.072032  
+std     126.940455    467.210125   456.938184  
+min    -200.000000   -200.000000  -200.000000  
+25%      53.000000   1185.000000   700.000000  
+50%      96.000000   1446.000000   942.000000  
+75%     133.000000   1662.000000  1255.000000  
+max     340.000000   2775.000000  2523.000000  
+
+Missing Values After Cleaning:
+Date             0
+Time             0
+CO(GT)           0
+PT08.S1(CO)      0
+NMHC(GT)         0
+C6H6(GT)         0
+PT08.S2(NMHC)    0
+NOx(GT)          0
+PT08.S3(NOx)     0
+NO2(GT)          0
+PT08.S4(NO2)     0
+PT08.S5(O3)      0
+T                0
+RH               0
+AH               0
+DateTime         0
+dtype: int64
+
+Data Types After Cleaning:
+Date                     object
+Time                     object
+CO(GT)                  float64
+PT08.S1(CO)             float64
+NMHC(GT)                float64
+C6H6(GT)                float64
+PT08.S2(NMHC)           float64
+NOx(GT)                 float64
+PT08.S3(NOx)            float64
+NO2(GT)                 float64
+PT08.S4(NO2)            float64
+PT08.S5(O3)             float64
+T                       float64
+RH                      float64
+AH                      float64
+DateTime         datetime64[ns]
+dtype: object
+
+
+
+
+
+
+
+
+
+
+
+
+Monthly Average Pollutant Values:
+         CO(GT)    NMHC(GT)   C6H6(GT)     NOx(GT)     NO2(GT)
+Month                                                         
+1      2.104435  150.000000   8.956989  342.059140  133.603495
+2      2.092262  150.000000   7.579911  309.014881  158.386905
+3      2.133652  157.011962   9.218581  241.521531  122.909888
+4      2.046468  216.884758   9.657869  155.602230  101.693928
+5      1.911425  150.168011  10.181048  133.487903   96.259409
+6      1.889444  150.000000  10.469306  127.777778   95.576389
+7      1.788710  150.000000  10.596237  129.044355  104.337366
+8      1.466667  150.000000   7.073118  109.739247   82.803763
+9      2.081250  150.000000  11.470694  242.019444  108.412500
+10     2.288441  150.000000  13.518145  262.189516   99.000000
+11     2.635000  150.000000  12.511806  403.161111  121.366667
+12     2.618280  150.000000   9.359140  378.240591  121.884409
+
+
+Final Dataset Shape:
+(9357, 17)
+
+Remaining Missing Values:
+0
+
+Final Dataset:
+         Date      Time  CO(GT)  PT08.S1(CO)  NMHC(GT)  C6H6(GT)  \
+0  10/03/2004  18.00.00     2.6       1360.0     150.0      11.9   
+1  10/03/2004  19.00.00     2.0       1292.0     112.0       9.4   
+2  10/03/2004  20.00.00     2.2       1402.0      88.0       9.0   
+3  10/03/2004  21.00.00     2.2       1376.0      80.0       9.2   
+4  10/03/2004  22.00.00     1.6       1272.0      51.0       6.5   
+
+   PT08.S2(NMHC)  NOx(GT)  PT08.S3(NOx)  NO2(GT)  PT08.S4(NO2)  PT08.S5(O3)  \
+0         1046.0    166.0        1056.0    113.0        1692.0       1268.0   
+1          955.0    103.0        1174.0     92.0        1559.0        972.0   
+2          939.0    131.0        1140.0    114.0        1555.0       1074.0   
+3          948.0    172.0        1092.0    122.0        1584.0       1203.0   
+4          836.0    131.0        1205.0    116.0        1490.0       1110.0   
+
+      T    RH      AH            DateTime  Month  
+0  13.6  48.9  0.7578 2004-03-10 18:00:00      3  
+1  13.3  47.7  0.7255 2004-03-10 19:00:00      3  
+2  11.9  54.0  0.7502 2004-03-10 20:00:00      3  
+3  11.0  60.0  0.7867 2004-03-10 21:00:00      3  
+4  11.2  59.6  0.7888 2004-03-10 22:00:00      3  
+
+Air Quality Data Visualization Completed Successfully!
