@@ -1,0 +1,358 @@
+CODE:
+
+
+
+
+# Import required libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Import required Scikit-learn modules
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+
+# Step 1: Load the Digits dataset
+# Load the built-in handwritten digits dataset from Scikit-learn
+digits = datasets.load_digits()
+
+
+# Step 2: Convert dataset into a DataFrame
+# Each image has 64 pixel features and one target label
+numbers = pd.DataFrame(digits.data)
+
+# Add the actual digit labels (0 to 9) as a new column
+numbers['label'] = digits.target
+
+
+# Step 3: Explore the dataset
+# Display the number of rows and columns
+print("Dataset Shape:", numbers.shape)
+
+# Display information about columns, data types and non-null values
+print("\nData Information:")
+numbers.info()
+
+# Display statistical information such as mean, standard deviation,
+# minimum, maximum and quartiles
+print("\nStatistical Description:")
+print(numbers.describe())
+
+
+# Step 4: Check for missing values
+# Count the number of missing values in each column
+print("\nMissing Values:")
+print(numbers.isnull().sum())
+
+
+# Step 5: Check unique digit labels and their counts
+# Display all unique digit labels present in the dataset
+print("\nUnique Labels:")
+print(np.unique(numbers['label']))
+
+# Count the number of images belonging to each digit
+# sort_index() arranges the labels in ascending order
+print("\nLabel Counts:")
+print(numbers['label'].value_counts().sort_index())
+
+
+# Step 6: Visualize the distribution of digit labels
+# Create a count plot showing the number of images for each digit
+sns.countplot(x='label', data=numbers, palette='icefire')
+
+# Add title and labels to the graph
+plt.title("Distribution of Handwritten Digits")
+plt.xlabel("Digit")
+plt.ylabel("Count")
+
+# Display the graph
+plt.show()
+
+
+# Step 7: Display sample handwritten digit images
+# Create a subplot grid with 2 rows and 5 columns
+fig, axes = plt.subplots(2, 5, figsize=(10, 5))
+
+# Loop through each subplot to display the first 10 digit images
+for i, ax in enumerate(axes.flat):
+
+    # Display the handwritten digit image in grayscale
+    ax.imshow(digits.images[i], cmap='gray')
+
+    # Display the actual digit label as the image title
+    ax.set_title(f"Label: {digits.target[i]}")
+
+    # Hide the X-axis and Y-axis
+    ax.axis('off')
+
+# Adjust spacing between the images
+plt.tight_layout()
+
+# Display all sample images
+plt.show()
+
+
+# Step 8: Separate input features (X) and target labels (y)
+# X contains the 64 pixel values of each image
+X = numbers.drop('label', axis=1)
+
+# y contains the actual digit labels (0 to 9)
+y = numbers['label']
+
+
+# Step 9: Split the data into training and testing sets
+# 80% data for training and 20% data for testing
+# random_state=42 ensures the same split every time
+# stratify=y maintains the proportion of each digit class
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+
+# Step 10: Scale the input features
+# Create a StandardScaler object
+scaler = StandardScaler()
+
+# Fit the scaler on training data and standardize it
+X_train = scaler.fit_transform(X_train)
+
+# Standardize testing data using the training data parameters
+X_test = scaler.transform(X_test)
+
+
+# Step 11: Create and train the SVM model using a linear kernel
+# Create a Support Vector Classifier with a linear kernel
+model_linear = SVC(kernel='linear')
+
+# Train the SVM model using training data
+model_linear.fit(X_train, y_train)
+
+
+# Step 12: Predict the digit labels for test data
+# Predict the digits for the testing dataset
+y_pred = model_linear.predict(X_test)
+
+
+# Step 13: Calculate model accuracy
+# Compare actual labels with predicted labels
+accuracy = accuracy_score(y_test, y_pred)
+
+# Display accuracy in percentage
+print("\nSVM Model Accuracy:", accuracy * 100, "%")
+
+
+# Step 14: Display confusion matrix
+# Compare actual and predicted labels using a confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+# Display the confusion matrix as a heatmap
+# annot=True displays values inside the boxes
+# fmt='d' displays values as integers
+# cmap='Blues' sets the blue color scheme
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+
+# Add labels and title to the confusion matrix
+plt.xlabel("Predicted Label")
+plt.ylabel("Actual Label")
+plt.title("SVM Confusion Matrix")
+
+# Display the confusion matrix
+plt.show()
+
+
+# Step 15: Display classification report
+# Display precision, recall, F1-score and support for each digit
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+
+
+
+OUTPUT:
+
+
+Dataset Shape: (1797, 65)
+
+Data Information:
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1797 entries, 0 to 1796
+Data columns (total 65 columns):
+ #   Column  Non-Null Count  Dtype  
+---  ------  --------------  -----  
+ 0   0       1797 non-null   float64
+ 1   1       1797 non-null   float64
+ 2   2       1797 non-null   float64
+ 3   3       1797 non-null   float64
+ 4   4       1797 non-null   float64
+ 5   5       1797 non-null   float64
+ 6   6       1797 non-null   float64
+ 7   7       1797 non-null   float64
+ 8   8       1797 non-null   float64
+ 9   9       1797 non-null   float64
+ 10  10      1797 non-null   float64
+ 11  11      1797 non-null   float64
+ 12  12      1797 non-null   float64
+ 13  13      1797 non-null   float64
+ 14  14      1797 non-null   float64
+ 15  15      1797 non-null   float64
+ 16  16      1797 non-null   float64
+ 17  17      1797 non-null   float64
+ 18  18      1797 non-null   float64
+ 19  19      1797 non-null   float64
+ 20  20      1797 non-null   float64
+ 21  21      1797 non-null   float64
+ 22  22      1797 non-null   float64
+ 23  23      1797 non-null   float64
+ 24  24      1797 non-null   float64
+ 25  25      1797 non-null   float64
+ 26  26      1797 non-null   float64
+ 27  27      1797 non-null   float64
+ 28  28      1797 non-null   float64
+ 29  29      1797 non-null   float64
+ 30  30      1797 non-null   float64
+ 31  31      1797 non-null   float64
+ 32  32      1797 non-null   float64
+ 33  33      1797 non-null   float64
+ 34  34      1797 non-null   float64
+ 35  35      1797 non-null   float64
+ 36  36      1797 non-null   float64
+ 37  37      1797 non-null   float64
+ 38  38      1797 non-null   float64
+ 39  39      1797 non-null   float64
+ 40  40      1797 non-null   float64
+ 41  41      1797 non-null   float64
+ 42  42      1797 non-null   float64
+ 43  43      1797 non-null   float64
+ 44  44      1797 non-null   float64
+ 45  45      1797 non-null   float64
+ 46  46      1797 non-null   float64
+ 47  47      1797 non-null   float64
+ 48  48      1797 non-null   float64
+ 49  49      1797 non-null   float64
+ 50  50      1797 non-null   float64
+ 51  51      1797 non-null   float64
+ 52  52      1797 non-null   float64
+ 53  53      1797 non-null   float64
+ 54  54      1797 non-null   float64
+ 55  55      1797 non-null   float64
+ 56  56      1797 non-null   float64
+ 57  57      1797 non-null   float64
+ 58  58      1797 non-null   float64
+ 59  59      1797 non-null   float64
+ 60  60      1797 non-null   float64
+ 61  61      1797 non-null   float64
+ 62  62      1797 non-null   float64
+ 63  63      1797 non-null   float64
+ 64  label   1797 non-null   int64  
+dtypes: float64(64), int64(1)
+memory usage: 912.7 KB
+
+Statistical Description:
+            0            1            2            3            4  \
+count  1797.0  1797.000000  1797.000000  1797.000000  1797.000000   
+mean      0.0     0.303840     5.204786    11.835838    11.848080   
+std       0.0     0.907192     4.754826     4.248842     4.287388   
+min       0.0     0.000000     0.000000     0.000000     0.000000   
+25%       0.0     0.000000     1.000000    10.000000    10.000000   
+50%       0.0     0.000000     4.000000    13.000000    13.000000   
+75%       0.0     0.000000     9.000000    15.000000    15.000000   
+max       0.0     8.000000    16.000000    16.000000    16.000000   
+
+                 5            6            7            8            9  ...  \
+count  1797.000000  1797.000000  1797.000000  1797.000000  1797.000000  ...   
+mean      5.781859     1.362270     0.129661     0.005565     1.993879  ...   
+std       5.666418     3.325775     1.037383     0.094222     3.196160  ...   
+min       0.000000     0.000000     0.000000     0.000000     0.000000  ...   
+25%       0.000000     0.000000     0.000000     0.000000     0.000000  ...   
+50%       4.000000     0.000000     0.000000     0.000000     0.000000  ...   
+75%      11.000000     0.000000     0.000000     0.000000     3.000000  ...   
+max      16.000000    16.000000    15.000000     2.000000    16.000000  ...   
+
+                55           56           57           58           59  \
+count  1797.000000  1797.000000  1797.000000  1797.000000  1797.000000   
+mean      0.206455     0.000556     0.279354     5.557596    12.089037   
+std       0.984401     0.023590     0.934302     5.103019     4.374694   
+min       0.000000     0.000000     0.000000     0.000000     0.000000   
+25%       0.000000     0.000000     0.000000     1.000000    11.000000   
+50%       0.000000     0.000000     0.000000     4.000000    13.000000   
+75%       0.000000     0.000000     0.000000    10.000000    16.000000   
+max      13.000000     1.000000     9.000000    16.000000    16.000000   
+
+                60           61           62           63        label  
+count  1797.000000  1797.000000  1797.000000  1797.000000  1797.000000  
+mean     11.809126     6.764051     2.067891     0.364496     4.490818  
+std       4.933947     5.900623     4.090548     1.860122     2.865304  
+min       0.000000     0.000000     0.000000     0.000000     0.000000  
+25%      10.000000     0.000000     0.000000     0.000000     2.000000  
+50%      14.000000     6.000000     0.000000     0.000000     4.000000  
+75%      16.000000    12.000000     2.000000     0.000000     7.000000  
+max      16.000000    16.000000    16.000000    16.000000     9.000000  
+
+[8 rows x 65 columns]
+
+Missing Values:
+0        0
+1        0
+2        0
+3        0
+4        0
+        ..
+60       0
+61       0
+62       0
+63       0
+label    0
+Length: 65, dtype: int64
+
+Unique Labels:
+[0 1 2 3 4 5 6 7 8 9]
+
+Label Counts:
+label
+0    178
+1    182
+2    177
+3    183
+4    181
+5    182
+6    181
+7    179
+8    174
+9    180
+Name: count, dtype: int64
+C:\Users\rasik\AppData\Local\Temp\ipykernel_35384\3639648062.py:42: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `x` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.countplot(x='label', data=numbers, palette='icefire')
+
+
+
+SVM Model Accuracy: 97.5 %
+
+
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00        36
+           1       0.92      0.94      0.93        36
+           2       1.00      1.00      1.00        35
+           3       0.97      0.97      0.97        37
+           4       1.00      1.00      1.00        36
+           5       1.00      0.97      0.99        37
+           6       1.00      1.00      1.00        36
+           7       0.95      1.00      0.97        36
+           8       0.97      0.89      0.93        35
+           9       0.95      0.97      0.96        36
+
+    accuracy                           0.97       360
+   macro avg       0.98      0.97      0.97       360
+weighted avg       0.98      0.97      0.97       360

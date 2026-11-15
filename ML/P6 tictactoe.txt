@@ -1,0 +1,317 @@
+CODE:
+
+
+
+
+# Step 1: Import required libraries
+import numpy as np
+import random
+
+# Step 2: Create Tic-Tac-Toe environment
+class TicTacToe:
+
+    # Initialize an empty Tic-Tac-Toe board
+    def __init__(self):
+        self.board = [' '] * 9
+
+    # Reset the board for a new game
+    def reset(self):
+        self.board = [' '] * 9
+        return tuple(self.board)
+
+    # Return all empty positions where a move can be made
+    def available_actions(self):
+        return [i for i in range(9) if self.board[i] == ' ']
+
+    # Place the player's symbol at the selected position
+    def make_move(self, action, player):
+        if action in self.available_actions():
+            self.board[action] = player
+            return True
+        return False
+
+    # Check whether a player has won or the game is a draw
+    def check_winner(self):
+        # All possible winning combinations
+        win_positions = [
+            (0, 1, 2), (3, 4, 5), (6, 7, 8),
+            (0, 3, 6), (1, 4, 7), (2, 5, 8),
+            (0, 4, 8), (2, 4, 6)
+        ]
+
+        # Check each winning combination
+        for a, b, c in win_positions:
+            if (self.board[a] == self.board[b] ==
+                    self.board[c] and self.board[a] != ' '):
+                return self.board[a]
+
+        # If no empty spaces remain, the game is a draw
+        if ' ' not in self.board:
+            return 'Draw'
+
+        # Game is still continuing
+        return None
+
+    # Display the Tic-Tac-Toe board
+    def display(self):
+        for i in range(0, 9, 3):
+            print(" | ".join(self.board[i:i+3]))
+            if i < 6:
+                print("---------")
+
+
+# Step 3: Initialize environment and Q-table
+env = TicTacToe()
+Q = {}
+
+# Step 4: Set Q-learning parameters
+alpha = 0.1             # Learning rate
+gamma = 0.9             # Discount factor
+epsilon = 1.0           # Initial exploration rate
+epsilon_decay = 0.9995  # Rate at which exploration decreases
+min_epsilon = 0.01      # Minimum exploration rate
+episodes = 20000        # Number of training games
+
+
+# Step 5: Initialize Q-values for valid actions
+def get_q_values(state, actions):
+    # Create a new entry if the state is not present in Q-table
+    if state not in Q:
+        Q[state] = {}
+
+    # Assign initial Q-value 0.0 to each available action
+    for action in actions:
+        if action not in Q[state]:
+            Q[state][action] = 0.0
+
+    return Q[state]
+
+
+# Step 6: Select action using epsilon-greedy policy
+def choose_action(state, actions, training=True):
+    # Get Q-values for the current state
+    q_values = get_q_values(state, actions)
+
+    # Explore: choose a random action with probability epsilon
+    if training and random.random() < epsilon:
+        return random.choice(actions)
+
+    # Exploit: find the maximum Q-value
+    max_value = max(q_values[action] for action in actions)
+
+    # Store all actions having the maximum Q-value
+    best_actions = [
+        action for action in actions
+        if q_values[action] == max_value
+    ]
+
+    # Randomly select one of the best actions
+    return random.choice(best_actions)
+
+
+# Step 7: Train the Q-learning agent
+for episode in range(episodes):
+
+    # Start a new game
+    state = env.reset()
+    done = False
+
+    # Continue until the game ends
+    while not done:
+
+        # Agent X selects a move
+        actions = env.available_actions()
+        action = choose_action(state, actions)
+
+        # Place X on the board
+        env.make_move(action, 'X')
+
+        # Check the result after agent's move
+        result = env.check_winner()
+
+        # Agent wins
+        if result == 'X':
+            reward = 1
+            next_state = tuple(env.board)
+            done = True
+
+        # Game is a draw
+        elif result == 'Draw':
+            reward = 0
+            next_state = tuple(env.board)
+            done = True
+
+        else:
+            # Opponent O makes a random move
+            opponent_action = random.choice(
+                env.available_actions()
+            )
+            env.make_move(opponent_action, 'O')
+
+            # Check the result after opponent's move
+            result = env.check_winner()
+            next_state = tuple(env.board)
+
+            # Opponent wins
+            if result == 'O':
+                reward = -1
+                done = True
+
+            # Game is a draw
+            elif result == 'Draw':
+                reward = 0
+                done = True
+
+            # Game continues
+            else:
+                reward = 0
+
+        # Step 8: Update Q-value using Q-learning formula
+        old_value = Q[state][action]
+
+        # If the game is over, future reward is zero
+        if done:
+            next_max = 0
+        else:
+            # Get available actions in the next state
+            next_actions = env.available_actions()
+            next_q_values = get_q_values(
+                next_state, next_actions
+            )
+
+            # Find the maximum future Q-value
+            next_max = max(
+                next_q_values[a] for a in next_actions
+            )
+
+        # Apply the Q-learning update formula
+        Q[state][action] = old_value + alpha * (
+            reward + gamma * next_max - old_value
+        )
+
+        # Move to the next state
+        state = next_state
+
+    # Step 9: Reduce exploration rate after each episode
+    epsilon = max(
+        min_epsilon,
+        epsilon * epsilon_decay
+    )
+
+
+# Step 10: Display training results
+print("Training Completed!")
+print("Total Episodes:", episodes)
+print("Q-table States:", len(Q))
+
+
+# Step 11: Test the trained agent
+print("\nTesting Trained Agent:\n")
+
+# Reset the board before testing
+state = env.reset()
+done = False
+
+while not done:
+
+    # Agent X plays using the learned Q-values
+    actions = env.available_actions()
+    action = choose_action(state, actions, training=False)
+
+    # Place X on the board
+    env.make_move(action, 'X')
+
+    # Display the board after agent's move
+    print("\nAgent X:")
+    env.display()
+
+    # Check whether the game has ended
+    result = env.check_winner()
+
+    if result is not None:
+        break
+
+    # Opponent O plays randomly
+    opponent_action = random.choice(
+        env.available_actions()
+    )
+    env.make_move(opponent_action, 'O')
+
+    # Display the board after opponent's move
+    print("\nOpponent O:")
+    env.display()
+
+    # Check whether the game has ended
+    result = env.check_winner()
+
+    if result is not None:
+        break
+
+    # Update the current state
+    state = tuple(env.board)
+
+
+# Step 12: Display the final result
+print("\nFinal Result:")
+
+if result == 'X':
+    print("Agent Wins!")
+elif result == 'O':
+    print("Opponent Wins!")
+else:
+    print("Match Draw!")
+
+
+
+
+
+OUTPUT:
+
+
+
+
+
+Training Completed!
+Total Episodes: 20000
+Q-table States: 1903
+
+Testing Trained Agent:
+
+
+Agent X:
+  |   |  
+---------
+  |   |  
+---------
+  |   | X
+
+Opponent O:
+  |   | O
+---------
+  |   |  
+---------
+  |   | X
+
+Agent X:
+  |   | O
+---------
+  | X |  
+---------
+  |   | X
+
+Opponent O:
+  |   | O
+---------
+  | X | O
+---------
+  |   | X
+
+Agent X:
+X |   | O
+---------
+  | X | O
+---------
+  |   | X
+
+Final Result:
+Agent Wins!

@@ -1,0 +1,1151 @@
+
+============================================================ 
+1: PRINCIPAL COMPONENT ANALYSIS (PCA) ON WINE DATASET
+============================================================
+
+
+Aim: To implement Principal Component Analysis (PCA) on the Wine dataset
+and reduce the number of features to two principal components for
+visualization.
+
+KEY CONCEPTS - PCA is an unsupervised dimensionality-reduction
+technique. - It transforms correlated features into a smaller set of
+uncorrelated variables called principal components. - The first
+principal component (PC1) captures the maximum possible variance. - The
+second principal component (PC2) captures the maximum remaining variance
+and is orthogonal to PC1. - StandardScaler is used because features may
+have different scales. - In this practical, 13 input features are
+reduced to 2 principal components. - Reported explained variance: PC1 =
+approximately 36.20%, PC2 = approximately 19.21%, total = approximately
+55.41%.
+
+VIVA AND CODE QUESTIONS
+
+Q1. What is PCA? A. PCA stands for Principal Component Analysis. It is a
+dimensionality-reduction technique that converts many possibly
+correlated features into a smaller number of uncorrelated principal
+components while retaining as much variance as possible.
+
+Q2. Why do we use PCA? A. PCA reduces the number of features, simplifies
+data, helps visualize high-dimensional data and may reduce noise and
+computation.
+
+Q3. Is PCA supervised or unsupervised? A. PCA is an unsupervised
+technique because it does not use target labels while finding principal
+components.
+
+Q4. What is dimensionality reduction? A. It is the process of reducing
+the number of input features while preserving as much useful information
+as possible.
+
+Q5. What is a principal component? A. A principal component is a new
+variable formed as a linear combination of the original features.
+Principal components are ordered by the amount of variance they explain.
+
+Q6. What is PC1? A. PC1 is the direction in the data that captures the
+maximum variance.
+
+Q7. What is PC2? A. PC2 captures the maximum remaining variance and is
+perpendicular (orthogonal) to PC1.
+
+Q8. Why do we use StandardScaler before PCA? A. PCA is affected by
+feature scale. StandardScaler puts features on a comparable scale,
+generally with mean 0 and standard deviation 1, so large-valued features
+do not dominate.
+
+Q9. What does StandardScaler do? A. It standardizes each feature using
+z-score scaling: (value - mean) / standard deviation.
+
+Q10. What does fit_transform() do? A. It learns the scaling parameters
+from the supplied data and applies the transformation to that data.
+
+Q11. What does PCA(n_components=2) mean? A. It tells PCA to retain two
+principal components and reduce the original feature set to two
+dimensions.
+
+Q12. Why are two components selected? A. Two components make it possible
+to visualize the dataset on a 2D scatter plot while reducing the
+original 13 features.
+
+Q13. What is explained_variance_ratio_? A. It gives the proportion of
+total dataset variance explained by each principal component.
+
+Q14. What does a total explained variance of about 55.41% mean? A. The
+two selected components retain about 55.41% of the variance present in
+the original features. The remaining variance is not represented in this
+2D projection.
+
+Q15. What is the Wine dataset? A. It is a dataset containing
+measurements of wine samples, including chemical properties, along with
+a wine class/segment label.
+
+Q16. Why is Customer_Segment separated from X? A. It is the target/label
+column. PCA is applied to the input features, not to the target label.
+
+Q17. What is the difference between PCA and feature selection? A.
+Feature selection chooses a subset of original features. PCA creates new
+features (principal components) from combinations of the original
+features.
+
+Q18. Are principal components correlated? A. In standard PCA, the
+principal components are orthogonal and uncorrelated in the transformed
+dataset.
+
+Q19. Does PCA always improve model accuracy? A. No. PCA can reduce noise
+and computation, but it may also remove information useful for
+prediction. Its effect should be tested.
+
+Q20. What is the use of a scatter plot after PCA? A. It displays the
+samples using PC1 and PC2, helping us visually inspect patterns or
+separation between classes.
+
+Q21. What does random_state do, if used? A. It fixes a random seed for
+reproducible randomized operations. Standard PCA itself is generally
+deterministic for a fixed dataset and solver.
+
+Q22. What is variance in PCA? A. Variance measures how much the data
+values spread out. PCA tries to retain directions with high variance.
+
+Q23. Can PCA be used for categorical data directly? A. Ordinary PCA is
+designed for numerical features. Categorical data must be appropriately
+encoded or another technique may be more suitable.
+
+Q24. What is the main limitation of PCA? A. PCA is linear, and the new
+components may be harder to interpret because each is a combination of
+original features.
+
+Q25. What is the output of this practical? A. The original feature set
+is transformed into two principal components, their explained variance
+ratios are displayed, and the transformed data is visualized in a
+scatter plot.
+
+CODE-ORIENTED QUICK QUESTIONS
+
+Q26. What does pd.read_csv(‘Wine.csv’) do? A. It reads the CSV file and
+creates a pandas DataFrame.
+
+Q27. What does data.drop(‘Customer_Segment’, axis=1) do? A. It removes
+the target column from the input feature DataFrame. axis=1 indicates a
+column.
+
+Q28. What does axis=1 mean? A. It refers to columns. axis=0 refers to
+rows.
+
+Q29. What does pca.fit_transform(X_scaled) do? A. It learns the
+principal component directions from the scaled features and transforms
+the data into the selected component space.
+
+Q30. What is the difference between fit(), transform() and
+fit_transform()? A. fit() learns parameters, transform() applies learned
+parameters, and fit_transform() performs both in sequence.
+
+Q31. Why is the target label useful in the scatter plot if PCA is
+unsupervised? A. The label can be used only to color or identify samples
+after PCA. It is not used to calculate the components.
+
+Q32. What do the x-axis and y-axis represent in the PCA graph? A. They
+represent the first and second principal components, PC1 and PC2.
+
+Q33. What is the conclusion? A. PCA reduced the 13 original numerical
+features to two components, retaining approximately 55.41% of the total
+variance and allowing 2D visualization.
+
+
+
+============================================================ 
+2: UBER FARE PREDICTION USING REGRESSION
+============================================================
+
+
+Aim: To analyze Uber ride data and predict fare amount using Linear
+Regression, Ridge Regression and Lasso Regression.
+
+KEY CONCEPTS - This is a supervised regression problem because
+fare_amount is a continuous target. - The workflow includes data
+cleaning, date-time feature extraction, geographical distance
+calculation, outlier handling, visualization, train-test split, scaling,
+model training and evaluation. - Date-time features include hour, day,
+month and year. - Haversine distance estimates the great-circle distance
+between two latitude/longitude points. - IQR is used to identify
+outliers. - Models compared: Linear Regression, Ridge Regression and
+Lasso Regression. - Reported metrics: Linear Regression: MAE 1.796305,
+MSE 6.524028, RMSE 2.554218, R2 0.617221. Ridge Regression: MAE
+1.794628, MSE 6.533634, RMSE 2.556097, R2 0.616657. Lasso Regression:
+MAE 1.839841, MSE 6.743757, RMSE 2.596875, R2 0.604329. - Linear
+Regression has the highest R2 and lowest MSE/RMSE in the reported
+results. Ridge has a slightly lower MAE.
+
+VIVA AND CODE QUESTIONS
+
+Q1. What is regression? A. Regression is a supervised learning technique
+used to predict a continuous numerical value.
+
+Q2. Why is Uber fare prediction a regression problem? A. Because the
+target, fare_amount, is a continuous numerical value rather than a
+category.
+
+Q3. What is the target variable? A. fare_amount, the fare charged for a
+ride.
+
+Q4. What is Linear Regression? A. It models the relationship between
+input features and a continuous target by fitting a linear equation.
+
+Q5. What is the equation of simple Linear Regression? A. y = mx + c,
+where m is the slope and c is the intercept. Multiple Linear Regression
+uses several input features.
+
+Q6. What is Multiple Linear Regression? A. It predicts a target using
+two or more independent variables.
+
+Q7. What is Ridge Regression? A. Ridge is Linear Regression with L2
+regularization. It adds a penalty based on the sum of squared
+coefficients.
+
+Q8. What is Lasso Regression? A. Lasso is Linear Regression with L1
+regularization. It adds a penalty based on the sum of absolute
+coefficient values and can shrink some coefficients to zero.
+
+Q9. What is regularization? A. Regularization adds a penalty to the
+model objective to discourage overly large coefficients and help control
+overfitting.
+
+Q10. Difference between Ridge and Lasso? A. Ridge uses L2 penalty and
+generally shrinks coefficients toward zero. Lasso uses L1 penalty and
+can make some coefficients exactly zero, performing feature selection.
+
+Q11. Why compare Linear, Ridge and Lasso? A. To compare ordinary linear
+fitting with two regularized versions and see which performs better on
+the test data.
+
+Q12. What is MAE? A. Mean Absolute Error is the average absolute
+difference between actual and predicted values. Lower is better.
+
+Q13. What is MSE? A. Mean Squared Error is the average squared
+prediction error. It penalizes larger errors more heavily. Lower is
+better.
+
+Q14. What is RMSE? A. Root Mean Squared Error is the square root of MSE.
+It is expressed in the same unit as the target.
+
+Q15. What is R-squared? A. R2 measures how much of the variation in the
+target is explained by the model. A higher value is generally better; it
+can be negative on test data.
+
+Q16. Which model performed best in the reported results? A. Linear
+Regression had the highest R2 (0.617221) and lowest MSE and RMSE. Ridge
+had a marginally lower MAE (1.794628 versus 1.796305).
+
+Q17. What is data preprocessing? A. It is the process of cleaning and
+preparing raw data before applying a machine learning algorithm.
+
+Q18. Why handle missing values? A. Missing values can cause errors or
+reduce the reliability of analysis and model training.
+
+Q19. Why use the median to fill missing numerical values? A. The median
+is less affected by extreme values than the mean and is useful for
+skewed numerical data.
+
+Q20. Why convert the pickup date-time column to datetime? A. It allows
+date and time components such as hour, day, month and year to be
+extracted.
+
+Q21. Why extract hour, day, month and year? A. They may capture temporal
+patterns in ride demand and fare amounts.
+
+Q22. What is latitude? A. Latitude specifies a location’s position north
+or south of the Equator.
+
+Q23. What is longitude? A. Longitude specifies a location’s position
+east or west of the Prime Meridian.
+
+Q24. What is Haversine distance? A. It calculates the great-circle
+distance between two points on a sphere using their latitudes and
+longitudes.
+
+Q25. Why calculate distance between pickup and drop-off? A. Trip
+distance is an important feature that can help explain or predict fare
+amount.
+
+Q26. Is Haversine distance exactly the road distance? A. No. It
+estimates straight-line great-circle distance, not the actual road route
+distance.
+
+Q27. What is an outlier? A. An outlier is a data point unusually far
+from the general pattern of the data.
+
+Q28. What is IQR? A. Interquartile Range is Q3 minus Q1. It measures the
+spread of the middle 50% of data.
+
+Q29. How is the IQR rule used? A. Common bounds are Q1 - 1.5IQR and Q3 +
+1.5IQR. Values outside these bounds are flagged as potential outliers.
+
+Q30. Why remove invalid latitude and longitude values? A. Coordinates
+outside valid geographic ranges are invalid and can produce incorrect
+distance calculations.
+
+Q31. Why remove invalid passenger counts or fares? A. Impossible or
+unsuitable values can distort analysis and model training.
+
+Q32. What is a correlation heatmap? A. It is a visual representation of
+pairwise correlations between numerical features.
+
+Q33. What does correlation measure? A. It measures the strength and
+direction of a relationship between two variables. Correlation does not
+prove causation.
+
+Q34. What is train_test_split? A. It divides the data into training and
+testing subsets.
+
+Q35. Why use an 80:20 split? A. 80% is used to train the model and 20%
+is held out to evaluate it on unseen data.
+
+Q36. What is StandardScaler? A. It standardizes features using the
+training data’s mean and standard deviation.
+
+Q37. Why scale features? A. Scaling places features on comparable ranges
+and is especially important for many regularized or distance-based
+methods.
+
+Q38. Why fit the scaler only on training data? A. To avoid data leakage.
+The test set must not influence the preprocessing parameters learned
+from training data.
+
+Q39. What is data leakage? A. Data leakage occurs when information from
+the test set or future data improperly influences model training or
+preprocessing.
+
+Q40. What is overfitting? A. Overfitting occurs when a model learns
+training data too closely and performs poorly on unseen data.
+
+Q41. What is underfitting? A. Underfitting occurs when a model is too
+simple to capture important patterns in the data.
+
+Q42. What is the difference between classification and regression? A.
+Classification predicts discrete categories; regression predicts
+continuous numerical values.
+
+Q43. What does model.fit() do? A. It trains the model using the supplied
+input features and target values.
+
+Q44. What does model.predict() do? A. It generates predictions for new
+input data.
+
+Q45. Why use a test set? A. To estimate how well the trained model
+generalizes to unseen observations.
+
+Q46. What does a lower MAE indicate? A. Predictions are closer to actual
+values on average in absolute terms.
+
+Q47. What does a lower RMSE indicate? A. Smaller squared prediction
+errors on average; RMSE gives extra weight to large errors.
+
+Q48. Can R2 be negative? A. Yes. It can be negative when the model
+performs worse than a baseline that predicts the test-set mean.
+
+Q49. What is the purpose of comparing the three models? A. To identify
+which approach gives the most suitable balance of prediction error and
+generalization for this dataset.
+
+Q50. What is the conclusion? A. The three regression models were trained
+and evaluated. Linear Regression gave the highest reported R2, while
+Ridge gave the lowest reported MAE.
+
+CODE-ORIENTED QUICK QUESTIONS
+
+Q51. What does pd.to_datetime() do? A. It converts values into pandas
+datetime objects so date/time operations can be performed.
+
+Q52. What does .dt.hour return? A. The hour component of each datetime
+value.
+
+Q53. What does np.radians() do? A. It converts angles from degrees to
+radians, which is needed in the Haversine calculation.
+
+Q54. What does np.sin() or np.cos() do in the Haversine formula? A.
+These trigonometric functions are used to calculate the spherical
+distance between coordinate points.
+
+Q55. What does train_test_split(…, test_size=0.2) mean? A. It reserves
+20% of the records for testing and uses the remaining 80% for training.
+
+Q56. What is the purpose of a correlation matrix? A. It calculates
+pairwise correlations between numerical columns, often used to inspect
+relationships and possible multicollinearity.
+
+
+
+============================================================ 
+3: HANDWRITTEN DIGIT CLASSIFICATION USING SVM
+============================================================
+
+
+Aim: To classify handwritten digits from 0 to 9 using a Support Vector
+Machine (SVM) classifier.
+
+KEY CONCEPTS - The practical uses scikit-learn’s built-in Digits
+dataset. - Dataset shape: 1797 samples and 64 pixel features, plus one
+label column in the constructed DataFrame. - Each image is 8 x 8 pixels,
+flattened into 64 input features. - Target labels are digits 0 through
+9. - The data is split into training and testing sets using an 80:20
+split and stratification. - StandardScaler is fitted on training data
+and used to transform both sets. - SVC(kernel=‘linear’) trains a Support
+Vector Classifier with a linear kernel. - Reported accuracy:
+approximately 97.5%. - Evaluation uses accuracy, confusion matrix and
+classification report.
+
+VIVA AND CODE QUESTIONS
+
+Q1. What is SVM? A. Support Vector Machine is a supervised learning
+algorithm used for classification and regression. It finds a decision
+boundary that separates classes.
+
+Q2. Is SVM supervised or unsupervised? A. Standard SVM classification is
+supervised learning because it uses labeled training examples.
+
+Q3. What is the main objective of SVM? A. To find a decision boundary
+(hyperplane) that separates classes with the maximum possible margin.
+
+Q4. What is a hyperplane? A. A hyperplane is the decision boundary used
+to separate classes. In two dimensions it is a line; in higher
+dimensions it is a higher-dimensional boundary.
+
+Q5. What are support vectors? A. Support vectors are training points
+closest to the decision boundary. They strongly influence the position
+of the boundary.
+
+Q6. What is margin in SVM? A. Margin is the distance between the
+decision boundary and the nearest training points from the classes.
+
+Q7. What is a kernel? A. A kernel function allows SVM to form decision
+boundaries in transformed feature spaces, enabling nonlinear separation.
+
+Q8. Which kernel is used in this practical? A. Linear kernel, specified
+by SVC(kernel=‘linear’).
+
+Q9. What is a linear kernel? A. It creates a linear decision boundary in
+the original feature space.
+
+Q10. Name some other SVM kernels. A. RBF, polynomial and sigmoid
+kernels.
+
+Q11. What is the Digits dataset? A. It is a built-in scikit-learn
+dataset containing small grayscale images of handwritten digits from 0
+to 9.
+
+Q12. What is the shape of the Digits dataset? A. It contains 1797
+samples, each represented by 64 pixel features.
+
+Q13. Why are there 64 features per image? A. Each image is 8 by 8
+pixels, and 8 multiplied by 8 equals 64.
+
+Q14. What is the target variable? A. The digit label, from 0 to 9.
+
+Q15. What does datasets.load_digits() do? A. It loads the built-in
+handwritten digits dataset from scikit-learn.
+
+Q16. What does digits.data contain? A. The flattened numerical pixel
+values for all digit images, with 64 features per sample.
+
+Q17. What does digits.images contain? A. The original 8 by 8 image
+arrays, useful for displaying the handwritten digits.
+
+Q18. Why convert digits.data into a DataFrame? A. To make it easier to
+inspect and manipulate the feature data using pandas.
+
+Q19. Why add digits.target as a label column? A. It stores the correct
+digit class for each sample and is used as the target for supervised
+learning.
+
+Q20. What does np.unique() do? A. It returns the unique values present
+in an array or Series. Here it displays the available digit labels.
+
+Q21. Why use train_test_split? A. To train the classifier on one portion
+and evaluate it on separate unseen data.
+
+Q22. What does test_size=0.2 mean? A. 20% of the data is used for
+testing and 80% for training.
+
+Q23. What does stratify=y do? A. It preserves approximately the same
+class proportions in training and testing sets.
+
+Q24. Why use StandardScaler? A. It standardizes the input features so
+they have comparable scales, which can help SVM training.
+
+Q25. Why call scaler.fit_transform() on training data? A. It learns the
+training-set scaling parameters and transforms the training features.
+
+Q26. Why call scaler.transform() on test data? A. It applies the already
+learned training-set scaling parameters to test data without learning
+from the test set.
+
+Q27. What is data leakage? A. It is when information from test data
+improperly influences training or preprocessing, making evaluation
+unreliable.
+
+Q28. What does SVC() do? A. It creates a Support Vector Classifier.
+
+Q29. What does model.fit(X_train, y_train) do? A. It trains the SVM
+classifier using training features and their labels.
+
+Q30. What does model.predict(X_test) do? A. It predicts digit labels for
+the test samples.
+
+Q31. What is accuracy? A. The proportion of predictions that are correct
+out of all predictions.
+
+Q32. What is a confusion matrix? A. A table comparing actual classes
+with predicted classes. The diagonal contains correct predictions.
+
+Q33. What does classification_report() display? A. It displays
+precision, recall, F1-score and support for each class, along with
+averages.
+
+Q34. Define precision. A. Precision is the number of true positive
+predictions divided by all positive predictions for a class.
+
+Q35. Define recall. A. Recall is the number of true positive predictions
+divided by all actual positive samples for a class.
+
+Q36. Define F1-score. A. F1-score is the harmonic mean of precision and
+recall.
+
+Q37. What is support? A. Support is the number of actual samples
+belonging to a particular class in the test set.
+
+Q38. What does sns.heatmap() do? A. It displays a matrix as a
+color-coded heatmap.
+
+Q39. What does annot=True mean in a heatmap? A. It displays the
+numerical values inside the heatmap cells.
+
+Q40. What does fmt=‘d’ mean? A. It formats the displayed cell values as
+integers.
+
+Q41. Why use cmap=‘gray’ with imshow()? A. It displays the digit image
+in grayscale.
+
+Q42. Why use ax.axis(‘off’)? A. It hides the axes and tick marks so the
+digit image is easier to view.
+
+Q43. What accuracy was obtained? A. Approximately 97.5% in the reported
+output.
+
+Q44. What is the difference between classification and regression? A.
+Classification predicts categories, while regression predicts continuous
+numerical values.
+
+Q45. What is the conclusion? A. The linear SVM model classified
+handwritten digits with approximately 97.5% test accuracy, supported by
+the confusion matrix and classification report.
+
+
+
+
+============================================================ 
+4: K-MEANS CLUSTERING ON IRIS DATASET
+============================================================
+
+
+Aim: To implement K-Means clustering on the Iris dataset and group
+similar flowers into clusters.
+
+KEY CONCEPTS - K-Means is an unsupervised learning algorithm. - The Iris
+dataset has 150 records and four numerical measurement features. - Id
+and Species are removed from the clustering inputs. - Missing numerical
+values, if present, are filled with column medians. - StandardScaler
+scales the features. - The Elbow Method tests different K values using
+WCSS (inertia). - The practical uses K=3. - Reported cluster counts:
+cluster 0 = 53, cluster 1 = 50, cluster 2 = 47. - The graph plots scaled
+petal length and petal width, with cluster centroids.
+
+
+VIVA AND CODE QUESTIONS
+
+Q1. What is clustering? A. Clustering is the process of grouping similar
+data points together based on their features.
+
+Q2. What type of learning is K-Means? A. Unsupervised learning.
+
+Q3. Why is K-Means called K-Means? A. It divides data into K clusters
+and represents each cluster using the mean (centroid) of its points.
+
+Q4. What is a cluster? A. A cluster is a group of data points that are
+more similar to one another than to points in other clusters.
+
+Q5. What is a centroid? A. A centroid is the mean position of all data
+points assigned to a cluster.
+
+Q6. How does K-Means work? A. It initializes K centroids, assigns each
+point to its nearest centroid, recalculates centroids, and repeats
+assignment and update until the clusters stabilize or the iteration
+limit is reached.
+
+Q7. What is the Elbow Method? A. It is a technique for selecting K by
+plotting WCSS against different numbers of clusters and looking for the
+point where the decrease begins to slow.
+
+Q8. What is WCSS? A. Within-Cluster Sum of Squares. It is the sum of
+squared distances from each point to its assigned cluster centroid.
+
+Q9. What is inertia_ in scikit-learn KMeans? A. It returns the sum of
+squared distances of samples to their closest cluster center, which is
+the WCSS objective used by K-Means.
+
+Q10. Why does WCSS generally decrease as K increases? A. More clusters
+allow points to be closer to their respective centroids. WCSS cannot
+increase when the optimal clustering objective is considered across more
+clusters.
+
+Q11. Why not always choose a very large K? A. Too many clusters may
+over-segment the data and reduce the usefulness and simplicity of the
+grouping.
+
+Q12. How many clusters are used in this practical? A. Three clusters.
+
+Q13. Why is Species removed? A. K-Means is unsupervised and does not use
+the known species labels to form clusters. The labels are not needed for
+the clustering process.
+
+Q14. Why is Id removed? A. Id is only an identifier and does not
+represent a meaningful flower measurement.
+
+Q15. What are the four Iris input features? A. Sepal length, sepal
+width, petal length and petal width.
+
+Q16. Why use StandardScaler? A. K-Means uses distances, so features with
+larger numerical scales could dominate. Scaling makes features
+comparable.
+
+Q17. What is k-means++? A. It is an initialization method that chooses
+initial centroids in a way intended to spread them apart and improve
+convergence.
+
+Q18. What does n_init=10 mean? A. It runs K-Means 10 times with
+different centroid initializations and keeps the best result according
+to inertia.
+
+Q19. What does random_state=42 do? A. It makes randomized initialization
+reproducible.
+
+Q20. What does fit() do? A. It fits the K-Means model to the input data
+and learns the cluster centers.
+
+Q21. What does fit_predict() do? A. It fits the model and returns the
+cluster label assigned to each sample.
+
+Q22. What is the output of y_kmeans? A. An array containing the cluster
+number assigned to each flower.
+
+Q23. Are cluster labels 0, 1 and 2 the same as Iris species labels? A.
+No. They are arbitrary cluster identifiers. Cluster 0 does not
+automatically mean a particular species.
+
+Q24. What is the total number of flowers? A. 150.
+
+Q25. What are the reported cluster counts? A. Cluster 0 has 53 flowers,
+cluster 1 has 50, and cluster 2 has 47.
+
+Q26. What does cluster_centers_ return? A. It returns the coordinates of
+the learned centroids in the feature space used to fit the model.
+
+Q27. Why plot petal length and petal width? A. They provide two
+dimensions for visualizing the clusters and can show useful separation
+among Iris measurements.
+
+Q28. What does X_scaled[y_kmeans == 0, 2] mean? A. It selects the scaled
+third feature (index 2, petal length) for all rows assigned to cluster
+0.
+
+Q29. What does marker=‘X’ represent in the centroid plot? A. It displays
+the cluster centers with an X-shaped marker.
+
+Q30. Can K-Means identify the true species names automatically? A.
+No. It produces groups, not semantic species names. Cluster labels must
+be compared with known labels separately if evaluation is required.
+
+Q31. What is the difference between classification and clustering? A.
+Classification learns from labeled examples to predict known classes.
+Clustering groups unlabeled data based on similarity.
+
+Q32. What is the main limitation of K-Means? A. It requires K to be
+chosen, is sensitive to initialization and outliers, and works best for
+clusters that are reasonably compact and distance-based.
+
+Q33. What is the conclusion? A. K-Means grouped the 150 Iris samples
+into three clusters. The Elbow Method was used to inspect a suitable K,
+and the clusters were visualized using petal measurements and centroids.
+
+
+CODE-ORIENTED QUICK QUESTIONS
+
+Q34. What does pd.read_csv(‘iris.csv’) do? A. It loads the CSV file into
+a pandas DataFrame.
+
+Q35. What does drop(columns=[‘Id’, ‘Species’], errors=‘ignore’) do? A.
+It removes the specified columns if they exist and ignores missing
+column names instead of raising an error.
+
+Q36. What does fillna() do? A. It replaces missing values with the
+specified values.
+
+Q37. What does median(numeric_only=True) do? A. It calculates medians
+for numerical columns only.
+
+Q38. What does range(1, 11) generate? A. The integers 1 through 10,
+because the ending value 11 is excluded.
+
+Q39. What does plt.xticks(range(1,11)) do? A. It sets the x-axis tick
+positions to the integers 1 through 10.
+
+Q40. What does value_counts().sort_index() do? A. It counts occurrences
+of each cluster label and sorts the displayed labels by their index.
+
+
+
+
+============================================================ 
+5: CAR EVALUATION USING RANDOM FOREST CLASSIFIER
+============================================================
+
+
+Aim: To classify car acceptability using a Random Forest Classifier on
+the Car Evaluation dataset.
+
+KEY CONCEPTS - Random Forest is a supervised learning algorithm used for
+classification and regression. - It builds multiple decision trees and
+combines their predictions. - For classification, trees vote and the
+majority class is selected. - Input columns: buying, maint, doors,
+persons, lug_boot and safety. - Target column: class. - OrdinalEncoder
+encodes categorical input features. - LabelEncoder encodes target
+labels. - The split is 80% training and 20% testing, with
+stratify=y_encoded. - RandomForestClassifier uses n_estimators=100. -
+Reported accuracy: approximately 98.2659%. - Reported feature importance
+ranking: safety, persons, buying, maint, lug_boot, doors.
+
+
+VIVA AND CODE QUESTIONS
+
+
+Q1. What is Random Forest? A. Random Forest is a supervised ensemble
+learning algorithm that combines predictions from multiple decision
+trees.
+
+Q2. Why is it called Random Forest? A. It creates a collection, or
+forest, of decision trees using randomized samples and feature
+selections.
+
+Q3. Is Random Forest supervised or unsupervised? A. Supervised learning.
+
+Q4. Can Random Forest be used for classification and regression? A. Yes.
+RandomForestClassifier is used for classification, and
+RandomForestRegressor is used for regression.
+
+Q5. What is a Decision Tree? A. A Decision Tree is a model that makes
+predictions by applying a sequence of feature-based conditions arranged
+in a tree structure.
+
+Q6. Difference between Decision Tree and Random Forest? A. A Decision
+Tree uses one tree. Random Forest combines many trees, which often
+improves stability and reduces the risk of overfitting compared with a
+single tree.
+
+Q7. How does Random Forest make a classification prediction? A. Each
+tree predicts a class, and the forest selects the class receiving the
+majority vote.
+
+Q8. What is an ensemble learning algorithm? A. It combines multiple
+models to produce a final prediction that may be more reliable than an
+individual model.
+
+Q9. What does n_estimators=100 mean? A. It creates 100 decision trees in
+the forest.
+
+Q10. What is the target variable in this practical? A. The class column,
+which represents the car’s acceptability.
+
+Q11. What are the input features? A. buying, maint, doors, persons,
+lug_boot and safety.
+
+Q12. What are the four target classes? A. acc, good, unacc and vgood.
+
+Q13. Why do we encode categorical data? A. Most scikit-learn estimators
+require numerical input, so categorical values are converted into
+numbers.
+
+Q14. What is OrdinalEncoder? A. It converts categorical input columns
+into integer-coded numerical columns.
+
+Q15. What is LabelEncoder? A. It converts target class labels into
+numerical labels.
+
+Q16. Difference between OrdinalEncoder and LabelEncoder? A.
+OrdinalEncoder is used for categorical input features, potentially
+across multiple columns. LabelEncoder is commonly used to encode a
+single target label array.
+
+Q17. Does ordinal encoding always preserve the correct meaning of
+categories? A. No. It assigns numbers to categories. If categories have
+no natural order, the assigned numeric order may imply an artificial
+relationship. A suitable encoding method should be selected based on the
+data and model.
+
+Q18. Why is mode used to fill missing categorical values? A. Mode is the
+most frequent category and provides a simple replacement for missing
+categorical entries.
+
+Q19. What does drop_duplicates() do? A. It removes duplicate rows from
+the DataFrame.
+
+Q20. What does errors=‘ignore’ do in drop(columns=…)? A. It prevents an
+error if a requested column is absent.
+
+Q21. What does train_test_split do? A. It divides the dataset into
+training and testing subsets.
+
+Q22. What does test_size=0.2 mean? A. 20% of the data is used for
+testing and 80% for training.
+
+Q23. What does stratify=y_encoded do? A. It maintains approximately the
+same class distribution in the training and testing sets.
+
+Q24. Why use random_state=42? A. It makes the randomized split or model
+behavior reproducible.
+
+Q25. What does model.fit() do? A. It trains the Random Forest using the
+training features and target labels.
+
+Q26. What does model.predict() do? A. It predicts target classes for the
+supplied input records.
+
+Q27. What is accuracy? A. The number of correct predictions divided by
+the total number of predictions.
+
+Q28. What accuracy was reported? A. Approximately 98.2659%, or 98.26%.
+
+Q29. What is a confusion matrix? A. It compares actual and predicted
+classes. Correct predictions appear along the main diagonal.
+
+Q30. What is precision? A. For a class, precision is the proportion of
+predicted examples of that class that are actually correct.
+
+Q31. What is recall? A. For a class, recall is the proportion of actual
+examples of that class that the model correctly identifies.
+
+Q32. What is F1-score? A. The harmonic mean of precision and recall.
+
+Q33. What is support? A. The number of actual test samples belonging to
+a class.
+
+Q34. What is feature importance? A. It estimates how much each feature
+contributes to the Random Forest’s predictive decisions according to the
+model’s feature-importance measure.
+
+Q35. Which feature had the highest importance in the reported output? A.
+Safety, with importance approximately 0.277857.
+
+Q36. Which feature had the lowest importance in the reported output? A.
+Doors, with importance approximately 0.069363.
+
+Q37. Does feature importance prove causation? A. No. It describes the
+model’s use of features, not a causal relationship.
+
+Q38. Why use a bar graph for feature importance? A. It makes it easy to
+compare the relative importance of input features.
+
+Q39. What does classification_report() display? A. Precision, recall,
+F1-score and support for each class, along with average scores.
+
+Q40. What does sns.heatmap() do? A. It displays matrix values as a
+color-coded heatmap.
+
+Q41. What does annot=True do? A. It displays the numerical values inside
+the heatmap cells.
+
+Q42. What does fmt=‘d’ mean? A. It formats heatmap annotations as
+integers.
+
+Q43. What is overfitting? A. Overfitting occurs when a model learns
+training-specific details too closely and performs poorly on unseen
+data.
+
+Q44. How does Random Forest help control overfitting? A. Combining many
+trees trained with randomized samples and feature subsets often reduces
+variance compared with relying on one deep tree. It does not guarantee
+that overfitting cannot occur.
+
+Q45. What is the conclusion? A. The Random Forest model classified car
+acceptability into four classes and achieved approximately 98.26%
+accuracy on the test set. Safety was the most important feature in the
+reported model.
+
+
+CODE-ORIENTED QUICK QUESTIONS
+
+Q46. What does set(columns).issubset(set(data.columns)) check? A. It
+checks whether all required column names are present in the DataFrame’s
+columns.
+
+Q47. What does header=None mean in read_csv()? A. It tells pandas that
+the CSV file does not contain a header row.
+
+Q48. What does names=columns do? A. It assigns the supplied list as the
+DataFrame column names.
+
+Q49. What does data.describe(include=‘all’) do? A. It produces
+descriptive statistics for both numerical and categorical columns.
+
+Q50. What does data[col].mode()[0] return? A. It returns the first
+most-frequent value in that column.
+
+Q51. What does fit_transform() do in OrdinalEncoder? A. It learns
+category mappings from the supplied data and transforms the categories
+into numbers.
+
+Q52. What does model.feature_importances_ return? A. It returns the
+feature-importance values learned by the fitted Random Forest model.
+
+
+
+
+============================================================ 
+6: TIC-TAC-TOE USING Q-LEARNING
+============================================================
+
+
+Aim: To implement a Tic-Tac-Toe game using Q-Learning, where an agent
+learns to choose moves through rewards and penalties.
+
+KEY CONCEPTS - Q-Learning is a model-free reinforcement learning
+algorithm. - Agent X is the learning agent. - Opponent O selects random
+available moves. - The Tic-Tac-Toe board has 9 positions, indexed from 0
+to 8. - A state is the current board configuration. - An action is a
+move to an available position. - The Q-table stores action values for
+states. - Parameters: alpha=0.1, gamma=0.9, epsilon=1.0,
+epsilon_decay=0.9995, min_epsilon=0.01, episodes=20000. - Rewards: agent
+win = +1, opponent win = -1, draw = 0. - Epsilon-greedy policy balances
+exploration and exploitation. - Reported training output: 20,000
+episodes and 1,903 Q-table states. - The displayed test game ended with
+Agent X winning. Because random choices are used, test moves and outcome
+can vary between runs.
+
+
+
+VIVA AND CODE QUESTIONS
+
+
+Q1. What is Reinforcement Learning? A. Reinforcement Learning is a
+machine learning approach in which an agent learns by interacting with
+an environment and receiving rewards or penalties.
+
+Q2. What is Q-Learning? A. Q-Learning is a model-free reinforcement
+learning algorithm that learns the value of taking an action in a
+particular state.
+
+Q3. What does model-free mean? A. It means the algorithm does not need a
+complete model of the environment’s transition dynamics to learn action
+values.
+
+Q4. What is an agent? A. An agent is the learner or decision-maker that
+takes actions in an environment. Here, Agent X is the learning agent.
+
+Q5. What is an environment? A. The environment is the world in which the
+agent acts. Here, it is the Tic-Tac-Toe game board and its rules.
+
+Q6. What is a state? A. A state describes the current situation of the
+environment. Here, it is the arrangement of X, O and empty cells on the
+board.
+
+Q7. What is an action? A. An action is a move the agent can take. Here,
+it means placing X in one available board position.
+
+Q8. What is a reward? A. A reward is numerical feedback received by the
+agent after an action or transition.
+
+Q9. What rewards are used in this practical? A. Agent win = +1, opponent
+win = -1, draw = 0.
+
+Q10. What is a Q-table? A. A data structure that stores the estimated
+value of taking each available action in each state.
+
+Q11. What does Q stand for? A. Q refers to the quality or action-value
+estimate of taking an action in a state.
+
+Q12. What is alpha? A. Alpha is the learning rate. It controls how
+strongly new information changes the existing Q-value. Here alpha is
+0.1.
+
+Q13. What is gamma? A. Gamma is the discount factor. It controls the
+importance of future rewards. Here gamma is 0.9.
+
+Q14. What is epsilon? A. Epsilon controls exploration in the
+epsilon-greedy action-selection strategy. It starts at 1.0 in this
+practical.
+
+Q15. What is epsilon decay? A. It gradually reduces epsilon so the agent
+explores less as training progresses.
+
+Q16. What is min_epsilon? A. It is the minimum allowed exploration rate.
+Here it is 0.01.
+
+Q17. What is an episode? A. One complete game or training trial from the
+initial state until a terminal result.
+
+Q18. How many training episodes are used? A. 20,000.
+
+Q19. What is exploration? A. Exploration means trying actions, including
+random ones, to gather information about their results.
+
+Q20. What is exploitation? A. Exploitation means choosing the action
+with the highest currently estimated Q-value.
+
+Q21. What is epsilon-greedy policy? A. It chooses a random action with
+probability epsilon during training; otherwise it chooses an action with
+the highest Q-value.
+
+Q22. Why is epsilon initially set to 1.0? A. It makes the agent explore
+random actions extensively at the beginning of training.
+
+Q23. Why does epsilon decrease? A. As the agent gains experience, it can
+rely more on learned Q-values and less on random exploration.
+
+Q24. What is the Q-Learning update equation? A. Q(s,a) = Q(s,a) +
+alpha * [r + gamma * max Q(s’,a’) - Q(s,a)].
+
+Q25. Explain the Q-Learning formula. A. The old Q-value is adjusted
+using the learning rate and the difference between the target value
+(immediate reward plus discounted best future value) and the old
+estimate.
+
+Q26. What does old_value represent? A. The Q-value currently stored for
+the selected state-action pair before updating it.
+
+Q27. What does next_max represent? A. The maximum estimated Q-value
+among the available actions in the next state.
+
+Q28. Why is next_max set to zero when done is True? A. A terminal state
+has no future action to take in the episode, so there is no future
+Q-value to add.
+
+Q29. Why is the opponent random? A. The practical uses a simple random
+opponent so the agent can practise and learn from game outcomes.
+
+Q30. Does the agent learn to play perfectly? A. Not necessarily. It
+learns from the training experiences and the particular opponent
+strategy. Training against a random opponent does not guarantee perfect
+play against every opponent.
+
+Q31. What does training=False mean in choose_action()? A. It disables
+epsilon-based random exploration during testing, so the agent chooses
+from the highest learned Q-value actions.
+
+Q32. Why can the test result vary? A. Randomness is used for opponent
+moves and for selecting among equally valued best actions, so the
+sequence and final result can vary.
+
+Q33. What does init() do? A. It is the class constructor. It initializes
+the board when a TicTacToe object is created.
+
+Q34. What does self.board = [’ ’] * 9 do? A. It creates a list of nine
+empty board positions.
+
+Q35. What does reset() do? A. It clears the board and returns the
+initial board state as a tuple.
+
+Q36. Why return tuple(self.board)? A. Tuples are immutable and can be
+used as dictionary keys, making them suitable for representing states in
+the Q-table.
+
+Q37. What does available_actions() return? A. It returns the indices of
+all empty positions on the board.
+
+Q38. What does make_move() do? A. It checks whether the requested
+position is available, places the player’s symbol there and returns
+True. If the position is occupied, it returns False.
+
+Q39. How many winning combinations are there in Tic-Tac-Toe? A. Eight:
+three rows, three columns and two diagonals.
+
+Q40. What does check_winner() return? A. It returns ‘X’ or ‘O’ if that
+player wins, ‘Draw’ if the board is full with no winner, or None if the
+game is still continuing.
+
+Q41. What does ’ ’ not in self.board check? A. It checks whether there
+are no empty positions left on the board.
+
+Q42. What does random.choice(actions) do? A. It selects one element
+randomly from the supplied sequence of available actions.
+
+Q43. What does random.random() return? A. A random floating-point number
+in the interval from 0.0 up to, but not including, 1.0.
+
+Q44. Why is Q initialized as an empty dictionary? A. Q-values are
+created as the agent encounters states and available actions during
+training.
+
+Q45. What does Q[state][action] represent? A. The estimated value of
+taking that action from that particular board state.
+
+Q46. What does len(Q) represent in the output? A. The number of
+different state entries stored in the Q-table. The reported run showed
+1,903 states.
+
+Q47. Why does the code use a while not done loop? A. It keeps the game
+running until a win or draw ends the episode.
+
+Q48. What is the difference between Q-Learning and supervised learning?
+A. Supervised learning learns from labeled input-output examples.
+Q-Learning learns action values from interaction and reward feedback.
+
+Q49. What is the difference between Q-Learning and a fixed rule-based
+player? A. A rule-based player follows predefined rules. A Q-Learning
+agent updates action values from experience and uses those values to
+choose moves.
+
+Q50. What is the conclusion? A. The program trains a Tic-Tac-Toe agent
+using Q-Learning for 20,000 episodes. It stores learned state-action
+values in a Q-table and tests the trained agent against a random
+opponent.
+
+
+CODE-ORIENTED QUICK QUESTIONS
+
+Q51. What does range(9) generate? A. The integers 0 through 8, which
+represent the nine board positions.
+
+Q52. What does the list comprehension in available_actions() do? A. It
+checks all nine positions and returns only the indices whose board cells
+are empty.
+
+Q53. What does tuple(self.board) do? A. It converts the mutable board
+list into an immutable tuple representing a state.
+
+Q54. What does get_q_values() do? A. It creates a Q-table entry for a
+state if needed, initializes unseen available actions to 0.0 and returns
+the state’s action-value dictionary.
+
+Q55. What does max(q_values[action] for action in actions) do? A. It
+finds the largest Q-value among the currently available actions.
+
+Q56. What does random.choice(best_actions) do? A. It randomly selects
+one action from the actions tied for the highest Q-value.
+
+Q57. Why does the code update the state after each turn? A. The Q-table
+update and next action selection must use the latest board
+configuration.
+
+Q58. Why is the opponent’s move included before the next state is stored
+in the continuing game? A. The next state for the agent’s following
+decision should reflect the board after both the agent’s move and the
+opponent’s response.
+
+Q59. What does max(min_epsilon, epsilon * epsilon_decay) do? A. It
+decays epsilon while ensuring it never falls below the specified
+minimum.
+
+Q60. What does training=False change in choose_action()? A. It prevents
+the random exploration branch from running. The action is selected using
+the maximum Q-value, with random tie-breaking if multiple actions share
+it.
+
+
+

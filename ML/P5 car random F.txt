@@ -1,0 +1,276 @@
+CODE:
+
+
+
+
+# Step 1: Import required libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Import LabelEncoder and OrdinalEncoder to convert categorical data into numbers
+from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
+
+# Import train_test_split to divide the dataset into training and testing sets
+from sklearn.model_selection import train_test_split
+
+# Import Random Forest classification algorithm
+from sklearn.ensemble import RandomForestClassifier
+
+# Import evaluation metrics to check model performance
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix
+)
+
+
+# Step 2: Load the Car Evaluation dataset
+# Define the column names of the dataset
+columns = [
+    'buying', 'maint', 'doors',
+    'persons', 'lug_boot', 'safety', 'class'
+]
+
+# Read the CSV file
+data = pd.read_csv('car_evaluation.csv')
+
+# Check whether the CSV already contains column headers
+# If the required column names are not present, read the file without headers
+# and assign the column names defined above
+if not set(columns).issubset(set(data.columns)):
+    data = pd.read_csv('car_evaluation.csv', header=None, names=columns)
+else:
+    # If headers are already present, select the required columns
+    data = data[columns]
+
+
+# Step 3: Explore the dataset
+# Display the first five rows of the dataset
+print("First five rows:")
+print(data.head())
+
+# Display dataset information such as columns, data types and non-null values
+print("\nDataset Information:")
+data.info()
+
+# Display statistical information about categorical columns
+print("\nStatistical Description:")
+print(data.describe(include='all'))
+
+
+# Step 4: Check for missing values
+# Count missing values in each column
+print("\nMissing Values:")
+print(data.isnull().sum())
+
+# Remove duplicate rows, if any
+data = data.drop_duplicates()
+
+# Handle missing categorical values, if any
+# Replace missing values with the most frequently occurring value (mode)
+for col in columns:
+    data[col] = data[col].fillna(data[col].mode()[0])
+
+
+# Step 5: Separate features and target
+# X contains input features used to predict car evaluation
+X = data.drop('class', axis=1)
+
+# y contains the target class (acc, good, unacc, vgood)
+y = data['class']
+
+
+# Step 6: Encode categorical input features into numbers
+# Create an OrdinalEncoder object
+encoder = OrdinalEncoder()
+
+# Convert categorical input features into numerical values
+X_encoded = encoder.fit_transform(X)
+
+# Encode target labels into numerical values
+# Create a LabelEncoder object
+label_encoder = LabelEncoder()
+
+# Convert target classes into numerical labels
+y_encoded = label_encoder.fit_transform(y)
+
+# Display the original target class names
+print("\nEncoded Target Classes:")
+print(label_encoder.classes_)
+
+
+# Step 7: Split the dataset into training and testing sets
+# 80% data is used for training and 20% for testing
+# random_state=42 ensures the same split every time
+# stratify=y_encoded maintains the class distribution in both sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X_encoded,
+    y_encoded,
+    test_size=0.2,
+    random_state=42,
+    stratify=y_encoded
+)
+
+
+# Step 8: Create the Random Forest Classifier
+# Create a Random Forest model with 100 decision trees
+model = RandomForestClassifier(
+    n_estimators=100,    # Number of trees in the forest
+    random_state=42      # Ensures reproducible results
+)
+
+
+# Step 9: Train the model
+# Train the Random Forest model using training data
+model.fit(X_train, y_train)
+
+
+# Step 10: Predict the test data
+# Predict car evaluation classes for testing data
+y_pred = model.predict(X_test)
+
+
+# Step 11: Evaluate the model
+# Calculate accuracy by comparing actual and predicted labels
+accuracy = accuracy_score(y_test, y_pred)
+
+# Display model accuracy in percentage
+print("\nRandom Forest Accuracy:", accuracy * 100, "%")
+
+# Display precision, recall, F1-score and support for each class
+# target_names displays the original class names instead of encoded numbers
+print("\nClassification Report:")
+print(classification_report(
+    y_test,
+    y_pred,
+    target_names=label_encoder.classes_
+))
+
+
+# Step 12: Display the confusion matrix
+# Calculate the confusion matrix using actual and predicted values
+cm = confusion_matrix(y_test, y_pred)
+
+# Display the confusion matrix as a heatmap
+sns.heatmap(
+    cm,
+    annot=True,                         # Display values inside the boxes
+    fmt='d',                            # Display values as integers
+    cmap='Blues',                       # Set the blue color scheme
+    xticklabels=label_encoder.classes_, # Show predicted class names
+    yticklabels=label_encoder.classes_  # Show actual class names
+)
+
+# Add axis labels and title
+plt.xlabel("Predicted Class")
+plt.ylabel("Actual Class")
+plt.title("Random Forest Confusion Matrix")
+
+# Display the confusion matrix
+plt.show()
+
+
+# Step 13: Display feature importance
+# Get the importance of each input feature from the trained model
+# Create a Pandas Series with feature names and their importance values
+# Sort the features in descending order of importance
+importance = pd.Series(
+    model.feature_importances_,
+    index=X.columns
+).sort_values(ascending=False)
+
+# Display feature importance values
+print("\nFeature Importance:")
+print(importance)
+
+# Create a bar graph to visualize feature importance
+importance.plot(kind='bar', title='Feature Importance')
+
+# Add axis labels
+plt.xlabel("Features")
+plt.ylabel("Importance")
+
+# Adjust the layout of the graph
+plt.tight_layout()
+
+# Display the feature importance graph
+plt.show()
+
+
+
+
+OUTPUT:
+
+
+
+
+First five rows:
+  buying  maint doors persons lug_boot safety  class
+0  vhigh  vhigh     2       2    small    low  unacc
+1  vhigh  vhigh     2       2    small    med  unacc
+2  vhigh  vhigh     2       2    small   high  unacc
+3  vhigh  vhigh     2       2      med    low  unacc
+4  vhigh  vhigh     2       2      med    med  unacc
+
+Dataset Information:
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1728 entries, 0 to 1727
+Data columns (total 7 columns):
+ #   Column    Non-Null Count  Dtype 
+---  ------    --------------  ----- 
+ 0   buying    1728 non-null   object
+ 1   maint     1728 non-null   object
+ 2   doors     1728 non-null   object
+ 3   persons   1728 non-null   object
+ 4   lug_boot  1728 non-null   object
+ 5   safety    1728 non-null   object
+ 6   class     1728 non-null   object
+dtypes: object(7)
+memory usage: 94.6+ KB
+
+Statistical Description:
+       buying  maint doors persons lug_boot safety  class
+count    1728   1728  1728    1728     1728   1728   1728
+unique      4      4     4       3        3      3      4
+top     vhigh  vhigh     2       2    small    low  unacc
+freq      432    432   432     576      576    576   1210
+
+Missing Values:
+buying      0
+maint       0
+doors       0
+persons     0
+lug_boot    0
+safety      0
+class       0
+dtype: int64
+
+Encoded Target Classes:
+['acc' 'good' 'unacc' 'vgood']
+
+Random Forest Accuracy: 98.26589595375722 %
+
+Classification Report:
+              precision    recall  f1-score   support
+
+         acc       0.97      0.95      0.96        77
+        good       0.93      0.93      0.93        14
+       unacc       0.99      1.00      0.99       242
+       vgood       1.00      0.92      0.96        13
+
+    accuracy                           0.98       346
+   macro avg       0.97      0.95      0.96       346
+weighted avg       0.98      0.98      0.98       346
+
+
+
+Feature Importance:
+safety      0.277857
+persons     0.223212
+buying      0.183894
+maint       0.158944
+lug_boot    0.086729
+doors       0.069363
+dtype: float64
