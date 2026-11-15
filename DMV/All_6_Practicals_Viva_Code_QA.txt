@@ -1,0 +1,1042 @@
+============================================================ 
+1: SALES DATA ANALYSIS
+============================================================
+
+
+AIM To perform sales data analysis using Pandas, NumPy and Matplotlib,
+including reading, combining, cleaning, analysing and visualizing sales
+data stored in different file formats.
+
+KEY CONCEPTS - Pandas is used for data manipulation and analysis. -
+NumPy is used for numerical operations. - Matplotlib is used to create
+graphs. - A DataFrame is a two-dimensional table containing rows and
+columns. - CSV, Excel and JSON are common data storage formats. - Data
+cleaning includes handling missing values, duplicates, spaces and
+incorrect data types. - groupby() groups records and allows calculations
+such as sum and mean. - concat() combines DataFrames. - describe() gives
+descriptive statistics.
+
+
+VIVA AND CODE QUESTIONS
+
+Q1. What is Pandas? A. Pandas is a Python library used for data
+manipulation, cleaning and analysis.
+
+Q2. What is NumPy? A. NumPy is a Python library used for numerical
+calculations and array operations.
+
+Q3. What is Matplotlib? A. Matplotlib is a Python library used to create
+graphs and visualizations.
+
+Q4. What is a DataFrame? A. A DataFrame is a two-dimensional tabular
+data structure with rows and columns.
+
+Q5. What is the aim of this practical? A. To load sales data, split it
+into parts, save it in CSV, Excel and JSON formats, read and combine the
+files, clean the data, analyse sales and visualize the results.
+
+Q6. What does read_csv() do? A. It reads a CSV file and creates a Pandas
+DataFrame.
+
+Q7. What is the difference between read_csv() and to_csv()? A.
+read_csv() reads a CSV file into a DataFrame. to_csv() saves a DataFrame
+into a CSV file.
+
+Q8. What are CSV, Excel and JSON? A. CSV stores tabular data as
+comma-separated text. Excel stores spreadsheet data. JSON stores
+structured data as key-value pairs and records.
+
+Q9. What does head() do? A. It displays the first five rows by default.
+
+Q10. What does shape return? A. It returns a tuple containing the number
+of rows and columns.
+
+Q11. What does info() display? A. It displays column names, data types,
+non-null counts and memory usage.
+
+Q12. What does describe() do? A. It displays statistical information
+such as count, mean, standard deviation, minimum, maximum and quartiles.
+
+Q13. What does isnull().sum() do? A. It counts the missing values in
+each column.
+
+Q14. What does duplicated().sum() do? A. It counts the duplicate rows in
+the DataFrame.
+
+Q15. What does drop_duplicates() do? A. It removes duplicate records.
+
+Q16. What does iloc[] do? A. It selects rows or columns using integer
+positions.
+
+Q17. What is the difference between loc[] and iloc[]? A. loc[] selects
+using labels; iloc[] selects using integer positions.
+
+Q18. What does pd.concat() do? A. It combines two or more DataFrames
+along rows or columns.
+
+Q19. What is the difference between concat() and merge()? A. concat()
+joins DataFrames along an axis. merge() combines DataFrames using common
+columns or keys, similar to a database join.
+
+Q20. What does ignore_index=True mean? A. It creates a new continuous
+index after combining the DataFrames.
+
+Q21. What does index=False mean in to_csv()? A. It prevents the
+DataFrame index from being written as an extra column.
+
+Q22. What does to_excel() do? A. It exports a DataFrame into an Excel
+file.
+
+Q23. What does to_json() do? A. It exports a DataFrame into JSON format.
+
+Q24. What does orient=“records” mean in to_json()? A. It stores each row
+as a separate JSON object.
+
+Q25. What does errors=“coerce” do in to_numeric()? A. It converts
+invalid or non-numeric values into NaN.
+
+Q26. What does to_datetime() do? A. It converts date-like values into
+Pandas datetime format.
+
+Q27. What is the difference between mean, median and mode? A. Mean is
+the average, median is the middle value after sorting, and mode is the
+most frequently occurring value.
+
+Q28. Why is median often used to fill missing numerical values? A.
+Median is less affected by extreme values or outliers than the mean.
+
+Q29. What does fillna() do? A. It replaces missing values with a
+specified value or calculated value.
+
+Q30. What does groupby() do? A. It groups records based on one or more
+columns so calculations can be performed for each group.
+
+Q31. What is the difference between sum() and mean()? A. sum()
+calculates the total; mean() calculates the average.
+
+Q32. What does sort_values(ascending=False) do? A. It sorts values from
+highest to lowest.
+
+Q33. What is a bar chart used for? A. It compares values across
+different categories.
+
+Q34. What is a pie chart used for? A. It displays how each category
+contributes to a whole.
+
+Q35. What does autopct do in a pie chart? A. It displays percentage
+values on the pie chart.
+
+Q36. What is the result/conclusion of this practical? A. The sales data
+is combined and cleaned, sales summaries are calculated by product line
+and country, visualizations are created, and the final cleaned data is
+exported.
+
+
+CODE-ORIENTED QUICK QUESTIONS
+
+Q37. What does sales.iloc[:941] select? A. It selects rows from position
+0 up to, but not including, position 941.
+
+Q38. What does sales.columns.str.strip() do? A. It removes leading and
+trailing spaces from column names.
+
+Q39. What does select_dtypes(include=“object”) return? A. It selects
+columns having object/string data type.
+
+Q40. What does median() return? A. It returns the median value of a
+numerical column.
+
+Q41. What does mode()[0] return? A. It returns the first most-frequent
+value.
+
+Q42. What does groupby(“PRODUCTLINE”)[“SALES”].sum() do? A. It
+calculates total sales separately for each product line.
+
+Q43. What does plot(kind=“bar”) do? A. It creates a bar chart.
+
+Q44. What does plt.show() do? A. It displays the created graph.
+
+
+
+============================================================ 
+2: WEATHER DATA ANALYSIS USING OPENWEATHERMAP API
+============================================================
+
+
+AIM To fetch weather forecast data using the OpenWeatherMap API, process
+and analyse weather measurements, create visualizations and save the
+results.
+
+KEY CONCEPTS - An API allows two software applications to communicate. -
+OpenWeatherMap API provides weather information. - requests.get() sends
+an HTTP GET request. - JSON is a structured data-exchange format. - An
+API key is used to authenticate access to an API. - Weather attributes
+include temperature, humidity, wind speed and rainfall. - Daily
+aggregation calculates summaries for each date. - Correlation measures
+the relationship between numerical variables. - try-except is used to
+handle errors safely.
+
+
+VIVA AND CODE QUESTIONS
+
+Q1. What is an API? A. API stands for Application Programming Interface.
+It allows software applications to communicate and exchange data.
+
+Q2. Which API is used in this practical? A. OpenWeatherMap API.
+
+Q3. What is an API key? A. It is a unique authentication key used to
+access an API service.
+
+Q4. What is an API endpoint? A. It is a specific URL through which an
+API service or resource is accessed.
+
+Q5. Which HTTP method is used in this practical? A. GET, because the
+program retrieves weather data from the server.
+
+Q6. What is JSON? A. JSON stands for JavaScript Object Notation. It is a
+lightweight format used to exchange structured data.
+
+Q7. What does the requests library do? A. It sends HTTP requests to web
+services and receives their responses.
+
+Q8. What does requests.get() do? A. It sends an HTTP GET request to the
+specified URL.
+
+Q9. What does response.json() do? A. It converts a JSON response into
+Python dictionaries and lists.
+
+Q10. What does response.status_code represent? A. It represents the HTTP
+status code returned by the server.
+
+Q11. What does status code 200 mean? A. The request was successful.
+
+Q12. What does status code 401 mean? A. The request is unauthorized,
+often because the API key is invalid or inactive.
+
+Q13. What does raise_for_status() do? A. It raises an HTTP error if the
+response indicates an unsuccessful request.
+
+Q14. What is the purpose of params in requests.get()? A. It contains
+query parameters such as city, country, API key and units.
+
+Q15. Why is units=“metric” used? A. It requests measurements in metric
+units, including temperature in Celsius.
+
+Q16. What does timeout=20 mean? A. The request waits for a response for
+up to 20 seconds.
+
+Q17. What does getpass() do? A. It accepts input without displaying the
+typed value normally, which is useful for entering an API key.
+
+Q18. What is humidity? A. Humidity is the amount of water vapour present
+in the air, commonly expressed as a percentage.
+
+Q19. What is wind speed? A. It measures how fast air is moving.
+
+Q20. Why is rainfall extracted using item.get(“rain”, {}).get(“3h”, 0)?
+A. Rain data may be absent from a forecast record. The nested get()
+safely retrieves the three-hour rainfall value and uses zero if it is
+absent.
+
+Q21. What does pd.DataFrame(records) do? A. It converts a list of
+dictionaries into a tabular DataFrame.
+
+Q22. What does pd.to_datetime() do? A. It converts date strings into
+datetime values.
+
+Q23. What does dt.date do? A. It extracts only the date part from a
+datetime value.
+
+Q24. What is aggregation? A. Aggregation summarizes multiple records
+using operations such as sum, mean, minimum, maximum or count.
+
+Q25. Why is daily aggregation performed? A. It summarizes forecast
+measurements by date, making daily trends easier to understand.
+
+Q26. What does agg() do? A. It applies one or more aggregation functions
+to grouped data.
+
+Q27. What is correlation? A. Correlation measures the strength and
+direction of the relationship between two numerical variables.
+
+Q28. What does a correlation of +1 mean? A. It indicates a perfect
+positive linear relationship.
+
+Q29. What does a correlation of -1 mean? A. It indicates a perfect
+negative linear relationship.
+
+Q30. What does a correlation near 0 mean? A. It indicates little or no
+linear relationship.
+
+Q31. What is a heatmap? A. It is a visualization that represents
+numerical values using colours.
+
+Q32. Why can a constant column be excluded from correlation analysis? A.
+A constant column has zero variance, so its correlation is undefined.
+
+Q33. What is exception handling? A. It is a way to handle runtime errors
+without abruptly terminating a program.
+
+Q34. What is the purpose of try-except? A. try contains code that may
+fail; except handles the specified error.
+
+Q35. What is the difference between HTTPError and RequestException? A.
+HTTPError represents an unsuccessful HTTP response. RequestException is
+a broader class of request-related errors, including connection
+problems.
+
+Q36. What is the conclusion of this practical? A. Weather forecast data
+is retrieved through an API, converted into a DataFrame, cleaned,
+summarized daily, visualized and saved.
+
+
+CODE-ORIENTED QUICK QUESTIONS
+
+Q37. What does data[“list”] access? A. It accesses the list of forecast
+records in the API response dictionary.
+
+Q38. What does records.append() do? A. It adds a new extracted forecast
+record to the records list.
+
+Q39. What does item[“main”][“temp”] access? A. It retrieves the
+temperature from the main section of a forecast record.
+
+Q40. What does item[“weather”][0][“description”] access? A. It retrieves
+the first weather description in the weather list.
+
+Q41. What does fillna(0) do? A. It replaces missing values with zero.
+
+Q42. What does .dt.date do after converting a column to datetime? A. It
+extracts the date while removing the time component.
+
+Q43. What does .corr() do? A. It calculates the correlation matrix for
+numerical columns.
+
+Q44. What does sns.heatmap() do? A. It creates a heatmap visualization.
+
+Q45. What does plt.subplots(2, 2) create? A. It creates a figure
+containing four plotting areas arranged in two rows and two columns.
+
+
+
+============================================================ 
+3: CUSTOMER CHURN DATA CLEANING AND PREPARATION
+============================================================
+
+
+AIM To clean customer churn data and prepare it for machine learning by
+handling missing values, encoding categorical columns, splitting the
+dataset and scaling numerical features.
+
+KEY CONCEPTS - Customer churn means a customer stops using a company’s
+service. - Data preprocessing prepares raw data for machine learning. -
+Missing values and duplicates must be checked and handled. - Feature
+engineering creates useful features from existing data. - Encoding
+converts categorical values into numerical form. - X contains input
+features and y contains the target. - train_test_split() divides data
+into training and testing sets. - StandardScaler standardizes numerical
+features. - Stratification preserves class proportions during splitting.
+
+
+VIVA AND CODE QUESTIONS
+
+Q1. What is customer churn? A. Customer churn occurs when a customer
+stops using a company’s product or service.
+
+Q2. What is the aim of this practical? A. To clean the customer churn
+dataset and prepare its features for a machine learning task.
+
+Q3. What is data preprocessing? A. It is the process of cleaning,
+transforming and preparing raw data before applying a machine learning
+algorithm.
+
+Q4. Why do we check missing values? A. Missing values can cause errors
+or affect the reliability of analysis and machine learning.
+
+Q5. What does isnull().sum() do? A. It counts missing values in every
+column.
+
+Q6. What does drop_duplicates() do? A. It removes duplicate rows.
+
+Q7. Why is TotalCharges converted to numeric? A. It may be stored as
+text, but numerical calculations and machine learning require a numeric
+representation.
+
+Q8. What does errors=“coerce” do? A. It converts invalid values into
+NaN.
+
+Q9. Why are missing TotalCharges values filled with the median? A.
+Median is less affected by extreme values and provides a robust
+replacement for missing numerical values.
+
+Q10. What is feature engineering? A. It is the process of creating or
+transforming features to make them more useful for analysis or machine
+learning.
+
+Q11. What does pd.cut() do? A. It divides continuous numerical values
+into intervals or bins.
+
+Q12. Why is Tenure_Group created? A. It groups customers according to
+how long they have used the service, such as New, Medium, Long and Very
+Long.
+
+Q13. What is numerical data? A. Data represented by numbers, such as
+tenure, monthly charges and age.
+
+Q14. What is categorical data? A. Data representing groups or labels,
+such as contract type, gender and payment method.
+
+Q15. What is mode? A. Mode is the most frequently occurring value in a
+dataset.
+
+Q16. Why can mode be used for missing categorical values? A. It replaces
+a missing category with the most common category.
+
+Q17. What does value_counts() do? A. It counts how many times each
+unique value occurs.
+
+Q18. What is the target variable in this practical? A. Churn, which
+indicates whether a customer has left the service.
+
+Q19. What is X? A. X contains the input features used to predict the
+target.
+
+Q20. What is y? A. y contains the target/output variable that the model
+is expected to predict.
+
+Q21. Why is customerID removed from X? A. It is an identifier and
+generally does not provide meaningful predictive information about
+churn.
+
+Q22. What is categorical encoding? A. It converts categorical values
+into numerical representations.
+
+Q23. What is one-hot encoding? A. It creates separate binary columns for
+categories.
+
+Q24. What does pd.get_dummies() do? A. It converts categorical columns
+into one-hot encoded columns.
+
+Q25. What does drop_first=True do? A. It drops the first dummy category
+to avoid redundant columns.
+
+Q26. What is train_test_split()? A. It divides a dataset into training
+and testing subsets.
+
+Q27. What is training data? A. Data used by a machine learning algorithm
+to learn patterns.
+
+Q28. What is testing data? A. Data kept aside to evaluate the trained
+model on unseen records.
+
+Q29. What does test_size=0.25 mean? A. It assigns 25% of the records to
+the test set and the remaining 75% to the training set.
+
+Q30. What does random_state=42 do? A. It makes randomized splitting
+reproducible.
+
+Q31. What does stratify=y do? A. It preserves approximately the same
+target-class proportions in the training and testing sets.
+
+Q32. What is StandardScaler? A. It standardizes numerical features so
+that they generally have mean 0 and standard deviation 1.
+
+Q33. Why is scaling required? A. Features with large numerical ranges
+can dominate some algorithms. Scaling puts numerical features on a
+comparable scale.
+
+Q34. What is the difference between fit_transform() and transform()? A.
+fit_transform() learns parameters and applies the transformation.
+transform() applies parameters learned earlier.
+
+Q35. Why do we fit the scaler only on training data? A. To prevent data
+leakage from the test set into the training process.
+
+Q36. What is data leakage? A. It occurs when information from outside
+the training data, such as test-set information, influences model
+training.
+
+Q37. What is the conclusion of this practical? A. The customer churn
+data is cleaned, categorical features are encoded, the data is split
+into training and testing sets, and numerical features are standardized.
+
+
+CODE-ORIENTED QUICK QUESTIONS
+
+Q38. What does select_dtypes(include=[“int64”, “float64”]) return? A. It
+selects numerical columns with the specified data types.
+
+Q39. What does select_dtypes(include=[“object”, “category”]) return? A.
+It selects text and categorical columns.
+
+Q40. What does columns.tolist() do? A. It converts the column index into
+a Python list.
+
+Q41. What does df.drop([“customerID”, “Churn”], axis=1) do? A. It
+removes the customerID and Churn columns from the input feature data.
+
+Q42. What does axis=1 mean? A. It refers to columns. axis=0 refers to
+rows.
+
+Q43. What does StandardScaler().fit_transform() do? A. It learns the
+mean and standard deviation from the supplied data and standardizes that
+data.
+
+Q44. Why is transform() used on X_test? A. It applies the scaling
+parameters learned from X_train to the test data.
+
+Q45. What does X_train.shape display? A. It displays the number of
+training rows and input features.
+
+Q46. What does df[“Churn”].value_counts() display? A. It displays the
+number of customers in each churn category.
+
+
+
+============================================================ 
+4: DATA WRANGLING ON REAL ESTATE DATA
+============================================================
+
+
+AIM To perform data wrangling on Bengaluru real estate data by cleaning
+the dataset, transforming property features, handling outliers, encoding
+categories and analysing prices by location.
+
+KEY CONCEPTS - Data wrangling means cleaning and transforming raw data
+into a useful form. - The dataset contains property details such as
+location, size, area, bathrooms and price. - BHK means bedrooms, hall
+and kitchen. - Feature extraction obtains useful information from
+existing columns. - Price per square foot is calculated from price and
+area. - IQR is used to identify potential outliers. - Category codes and
+one-hot encoding convert categories into numbers. - groupby() is used
+for location-wise summaries. - Correlation heatmaps show relationships
+between numerical variables.
+
+
+VIVA AND CODE QUESTIONS
+
+Q1. What is data wrangling? A. Data wrangling is the process of
+cleaning, transforming and organizing raw data into a useful format.
+
+Q2. Which dataset is used? A. The Bengaluru House Data dataset.
+
+Q3. What information does the dataset contain? A. It contains property
+information such as area type, location, size, total square feet,
+bathrooms, balconies and price.
+
+Q4. Why are duplicate records removed? A. Duplicate records can lead to
+incorrect counts and biased summaries.
+
+Q5. Why are unnecessary columns removed? A. Columns that are not needed
+for the analysis can be removed to simplify the dataset.
+
+Q6. What is BHK? A. BHK stands for Bedroom, Hall and Kitchen.
+
+Q7. Why is BHK extracted from the size column? A. The size column
+contains text such as “2 BHK” or “4 Bedroom”. Extracting the number
+makes the feature suitable for numerical analysis.
+
+Q8. What is feature extraction? A. It is the process of obtaining useful
+information from existing data.
+
+Q9. Why is total_sqft converted to numeric? A. The column may contain
+ranges or text values. Numerical conversion is required to calculate
+area-based measures.
+
+Q10. How is price per square foot calculated? A. Price per square foot =
+(Price in lakhs x 100000) / Total square feet.
+
+Q11. Why is price multiplied by 100000? A. The price column is expressed
+in lakhs, so multiplying by 100000 converts it into rupees.
+
+Q12. What is an outlier? A. An outlier is a value that is unusually high
+or low compared with most of the other observations.
+
+Q13. What is IQR? A. IQR stands for Interquartile Range and is
+calculated as Q3 minus Q1.
+
+Q14. What is Q1? A. Q1 is the 25th percentile.
+
+Q15. What is Q3? A. Q3 is the 75th percentile.
+
+Q16. How are outlier limits calculated using IQR? A. Lower limit = Q1 -
+1.5 x IQR. Upper limit = Q3 + 1.5 x IQR.
+
+Q17. Why are outliers handled? A. Extreme values can strongly influence
+averages, visualizations and some machine learning algorithms.
+
+Q18. Does IQR prove that every flagged value is an error? A. No. It
+identifies potential outliers. Domain knowledge is needed to decide
+whether a value should be removed or retained.
+
+Q19. What is categorical encoding? A. It converts category labels into
+numerical representations.
+
+Q20. What does cat.codes do? A. It assigns an integer code to each
+category.
+
+Q21. What is one-hot encoding? A. It creates a separate binary column
+for each category.
+
+Q22. What is the difference between category codes and one-hot encoding?
+A. Category codes assign integer labels. One-hot encoding creates
+separate 0/1 columns and does not imply an order between categories.
+
+Q23. What does groupby(“location”) do? A. It groups property records
+according to location.
+
+Q24. What is aggregation? A. Aggregation calculates summaries such as
+average price, average area and property count for each group.
+
+Q25. Why are locations with very few properties sometimes filtered out?
+A. Averages based on very few records may be less reliable.
+
+Q26. What does sort_values(ascending=False) do? A. It sorts values from
+highest to lowest.
+
+Q27. What does reset_index() do? A. It turns the existing index into a
+regular column and creates a default integer index.
+
+Q28. What is a count plot? A. It displays the number of observations in
+each category.
+
+Q29. What is a correlation heatmap? A. It uses colours to show
+correlation coefficients between numerical variables.
+
+Q30. What is the conclusion of this practical? A. The real estate data
+is cleaned and transformed, price per square foot is calculated,
+potential outliers are handled, categories are encoded and location-wise
+property summaries are created.
+
+
+CODE-ORIENTED QUICK QUESTIONS
+
+Q31. What does str.extract(“(\d+)”) do? A. It extracts one or more
+digits from a string.
+
+Q32. What does pd.to_numeric(errors=“coerce”) do? A. It converts values
+to numbers and changes invalid values to NaN.
+
+Q33. What does quantile(0.25) return? A. It returns the 25th percentile.
+
+Q34. What does quantile(0.75) return? A. It returns the 75th percentile.
+
+Q35. What does Q3 - Q1 calculate? A. It calculates the interquartile
+range.
+
+Q36. What does astype(“category”) do? A. It converts a column to
+categorical data type.
+
+Q37. What does cat.codes return? A. It returns integer codes
+representing categories.
+
+Q38. What does select_dtypes(include=np.number) do? A. It selects
+numerical columns.
+
+Q39. What does sns.countplot() do? A. It creates a count plot for
+categorical data.
+
+Q40. What does df.isnull().sum().sum() return? A. It returns the total
+number of missing values across the entire DataFrame.
+
+
+
+============================================================ 
+5: AIR QUALITY DATA VISUALIZATION USING MATPLOTLIB
+============================================================
+
+
+AIM To clean and analyse air-quality data and visualize pollutant
+concentrations using line graphs, bar charts, box plots, scatter plots
+and heatmaps.
+
+KEY CONCEPTS - The dataset contains air-pollutant measurements over
+time. - CO is Carbon Monoxide. - NMHC is Non-Methane Hydrocarbons. -
+C6H6 is Benzene. - NOx represents Nitrogen Oxides. - NO2 is Nitrogen
+Dioxide. - Data cleaning includes correcting decimal formats and missing
+values. - In this dataset, -200 represents a missing measurement. - Date
+and Time are combined into a datetime column. - Matplotlib and Seaborn
+are used for visualization. - Monthly aggregation summarizes pollutant
+levels by month.
+
+
+VIVA AND CODE QUESTIONS
+
+Q1. What is data visualization? A. Data visualization is the graphical
+representation of information using charts and graphs.
+
+Q2. Which dataset is used in this practical? A. The City Air Quality
+dataset.
+
+Q3. What is the aim of this practical? A. To clean air-quality
+measurements, analyse pollutant trends and create different
+visualizations.
+
+Q4. What is Matplotlib? A. Matplotlib is a Python library used to create
+graphs and charts.
+
+Q5. What is Seaborn? A. Seaborn is a statistical data-visualization
+library built on Matplotlib.
+
+Q6. What is CO? A. CO stands for Carbon Monoxide.
+
+Q7. What is NOx? A. NOx refers to nitrogen oxides, mainly nitric oxide
+and nitrogen dioxide.
+
+Q8. What is NO2? A. NO2 stands for Nitrogen Dioxide.
+
+Q9. Why is sep=“;” used in read_csv()? A. It specifies that fields in
+the file are separated by semicolons.
+
+Q10. What does dropna(axis=1, how=“all”) do? A. It removes columns in
+which all values are missing.
+
+Q11. What does dropna(how=“all”) do? A. It removes rows in which all
+values are missing.
+
+Q12. Why are commas replaced with decimal points? A. Some numerical
+values use a comma as the decimal separator. Replacing it with a dot
+allows numeric conversion.
+
+Q13. What does str.replace(“,”, “.”) do? A. It replaces commas with
+decimal points in string values.
+
+Q14. Why is -200 replaced with NaN? A. In this dataset, -200 is a
+special missing-value marker, not a real pollutant measurement.
+
+Q15. What does np.nan represent? A. It represents a missing or undefined
+numerical value.
+
+Q16. Why are Date and Time combined? A. A single datetime column makes
+it easier to sort observations and analyse trends over time.
+
+Q17. What does pd.to_datetime() do? A. It converts date and time strings
+into datetime values.
+
+Q18. What does errors=“coerce” do? A. It converts invalid date or
+numerical values into missing values.
+
+Q19. Why are records sorted by DateTime? A. Chronological sorting makes
+time-based analysis and line graphs correct and easier to interpret.
+
+Q20. Why are missing pollutant values filled with the median? A. Median
+is less sensitive to extreme values than the mean.
+
+Q21. What is a line graph used for? A. It shows trends or changes over
+continuous data, such as pollutant concentration over time.
+
+Q22. What is a bar chart used for? A. It compares values across
+categories.
+
+Q23. What is a box plot? A. It shows the median, quartiles, spread and
+potential outliers in data.
+
+Q24. What is a scatter plot? A. It shows the relationship between two
+numerical variables.
+
+Q25. What is a heatmap? A. It displays numerical values using colours.
+
+Q26. What does a correlation matrix show? A. It shows the correlation
+coefficients between numerical variables.
+
+Q27. What does marker=“o” do in a line plot? A. It displays a circular
+marker at each data point.
+
+Q28. What does plt.subplots(2, 2) do? A. It creates four plotting areas
+arranged in two rows and two columns.
+
+Q29. What does plt.xlabel() do? A. It sets the label of the X-axis.
+
+Q30. What does plt.ylabel() do? A. It sets the label of the Y-axis.
+
+Q31. What does plt.title() do? A. It sets the title of the graph.
+
+Q32. What does plt.legend() do? A. It displays the legend identifying
+plotted data series.
+
+Q33. What does plt.grid() do? A. It displays grid lines on the graph.
+
+Q34. What does plt.show() do? A. It displays the graph.
+
+Q35. What does dt.month do? A. It extracts the month number from a
+datetime column.
+
+Q36. Why is monthly aggregation performed? A. It helps compare average
+pollutant concentrations across months.
+
+Q37. What is the conclusion of this practical? A. Air-quality data is
+cleaned, converted into datetime format, analysed and visualized using
+multiple graph types, and the cleaned dataset is exported.
+
+
+CODE-ORIENTED QUICK QUESTIONS
+
+Q38. What does data.columns.str.strip() do? A. It removes leading and
+trailing spaces from column names.
+
+Q39. What does data.replace(-200, np.nan, inplace=True) do? A. It
+replaces all occurrences of -200 with NaN in the original DataFrame.
+
+Q40. What does subset=[“DateTime”] mean in dropna()? A. It checks
+missing values specifically in the DateTime column.
+
+Q41. What does sort_values(“DateTime”) do? A. It sorts rows according to
+date and time.
+
+Q42. What does data[pollutants].mean() return? A. It calculates the
+average value of each selected pollutant column.
+
+Q43. What does plt.plot() create? A. A line graph.
+
+Q44. What does plt.bar() create? A. A bar chart.
+
+Q45. What does plt.scatter() create? A. A scatter plot.
+
+Q46. What does plt.boxplot() create? A. A box plot.
+
+Q47. What does sns.heatmap(data.corr(), annot=True) do? A. It creates a
+correlation heatmap and displays the numerical values inside its cells.
+
+Q48. What does to_csv(index=False) do? A. It saves the DataFrame as a
+CSV file without writing the row index.
+
+
+
+============================================================ 
+6: CUSTOMER SHOPPING DATA AGGREGATION
+============================================================
+
+
+AIM To perform data aggregation and analysis on customer shopping data
+by calculating sales, grouping records by category, shopping mall,
+payment method, month and gender, creating a pivot table and visualizing
+results.
+
+KEY CONCEPTS - Data aggregation summarizes records using sum, mean,
+count and other functions. - Sales amount is calculated as quantity
+multiplied by price. - groupby() groups records by selected columns. -
+agg() performs one or more aggregation operations. - pivot_table()
+summarizes data in a row-and-column format. - idxmax() returns the label
+associated with the maximum value. - Monthly aggregation identifies
+sales trends over time. - Bar, pie and line charts help compare sales
+summaries.
+
+
+VIVA AND CODE QUESTIONS
+
+Q1. What is data aggregation? A. Data aggregation is the process of
+grouping data and calculating summary values such as sum, average and
+count.
+
+Q2. Which dataset is used in this practical? A. The
+customer_shopping_data dataset.
+
+Q3. What information does the dataset contain? A. It contains invoice
+number, customer ID, gender, age, category, quantity, price, payment
+method, invoice date and shopping mall.
+
+Q4. What is the aim of this practical? A. To calculate sales and
+summarize shopping data by category, mall, payment method, month and
+gender.
+
+Q5. What is sales amount? A. Sales amount is the monetary value of a
+purchase, calculated as quantity multiplied by price.
+
+Q6. What is the formula for sales amount? A. Sales Amount = Quantity x
+Price.
+
+Q7. What is groupby()? A. It groups rows based on one or more columns so
+calculations can be performed separately for each group.
+
+Q8. What is agg()? A. It applies one or more aggregation functions, such
+as sum, mean and count, to grouped data.
+
+Q9. What is the difference between groupby() and agg()? A. groupby()
+creates groups. agg() specifies the calculations to perform on those
+groups.
+
+Q10. What is a pivot table? A. A pivot table summarizes data by
+arranging selected variables into rows and columns.
+
+Q11. What does values=“sales_amount” mean in pivot_table()? A. It
+specifies the data column whose values should be summarized.
+
+Q12. What does index=“shopping_mall” mean? A. It makes shopping mall
+names the rows of the pivot table.
+
+Q13. What does columns=“category” mean? A. It makes product categories
+the columns of the pivot table.
+
+Q14. What does aggfunc=“sum” mean? A. It calculates the sum of sales for
+each mall-category combination.
+
+Q15. What does fill_value=0 do? A. It replaces missing combinations in
+the pivot table with zero.
+
+Q16. What is the difference between groupby() and pivot_table()? A.
+groupby() groups records and calculates summaries. pivot_table()
+presents summaries in a matrix with row and column categories.
+
+Q17. What is monthly aggregation? A. It groups records by month and
+calculates monthly sales totals or averages.
+
+Q18. Why is invoice_date converted to datetime? A. Datetime conversion
+allows date-based operations such as extracting the month and sorting
+transactions chronologically.
+
+Q19. What does dayfirst=True mean? A. It interprets the day before the
+month when parsing dates.
+
+Q20. What does NaT mean? A. NaT means Not a Time. It represents a
+missing or invalid datetime value.
+
+Q21. Why is age filled with the median? A. Median is less affected by
+unusually high or low ages than the mean.
+
+Q22. What is total revenue? A. It is the sum of the sales amounts for
+all included transactions.
+
+Q23. What is a transaction? A. It is a recorded purchase or sale. In
+this practical, transaction count is summarized using invoice records.
+
+Q24. What does value_counts() do? A. It counts the occurrences of each
+unique value.
+
+Q25. What does idxmax() do? A. It returns the index or label
+corresponding to the maximum value.
+
+Q26. What is the difference between max() and idxmax()? A. max() returns
+the maximum value. idxmax() returns the label associated with that
+maximum value.
+
+Q27. What does sum() do? A. It adds values and returns their total.
+
+Q28. What does count() do? A. It counts non-missing values.
+
+Q29. What does mean() do? A. It calculates the average.
+
+Q30. Why is a bar chart used for category sales? A. It makes it easy to
+compare sales values across product categories.
+
+Q31. Why is a pie chart used for payment methods? A. It shows each
+payment method’s contribution to the total.
+
+Q32. Why is a line graph used for monthly sales? A. It shows how sales
+change over time.
+
+Q33. What is the result/conclusion of this practical? A. The shopping
+data is cleaned, sales amounts are calculated, grouped summaries and a
+pivot table are generated, top-performing categories and malls are
+identified, graphs are created and results are exported.
+
+
+CODE-ORIENTED QUICK QUESTIONS
+
+Q34. What does pd.to_numeric() do? A. It converts values into a numeric
+data type.
+
+Q35. What does pd.to_datetime() do? A. It converts values into datetime
+format.
+
+Q36. What does .dt.to_period(“M”) do? A. It converts dates into monthly
+periods.
+
+Q37. What does .astype(str) do? A. It converts values into strings.
+
+Q38. What does data[“quantity”] * data[“price”] do? A. It calculates the
+sales amount for each row.
+
+Q39. What does groupby(“category”) do? A. It groups records by product
+category.
+
+Q40. What does agg(total_sales=(“sales_amount”, “sum”)) do? A. It
+creates a total_sales summary by adding sales_amount within each group.
+
+Q41. What does sort_values(by=“total_sales”, ascending=False) do? A. It
+sorts groups from highest total sales to lowest total sales.
+
+Q42. What does idxmax() return when used on
+category_sales[“total_sales”]? A. It returns the category label with the
+highest total sales.
+
+Q43. What does data[“sales_amount”].sum() return? A. It returns total
+revenue across all rows.
+
+Q44. What does to_csv() do? A. It exports a DataFrame or Series to a CSV
+file.
+
+Q45. Why are separate CSV files exported? A. To save the cleaned dataset
+and different aggregated summaries separately so they can be reused or
+inspected easily.
+
+
+
+============================================================ 
+FINAL QUICK REVISION: COMMON PYTHON AND DATA ANALYSIS QUESTIONS
+============================================================
+
+Q1. What is the difference between a Series and a DataFrame? A. A Series
+is one-dimensional. A DataFrame is two-dimensional and has rows and
+columns.
+
+Q2. What is NaN? A. NaN means Not a Number and is commonly used to
+represent missing numerical values.
+
+Q3. What is NaT? A. NaT means Not a Time and represents missing datetime
+values.
+
+Q4. What is the difference between axis=0 and axis=1? A. axis=0 refers
+to rows; axis=1 refers to columns.
+
+Q5. What does inplace=True mean? A. It modifies the original DataFrame
+instead of returning a separate modified DataFrame.
+
+Q6. What is the difference between dropna() and fillna()? A. dropna()
+removes records or columns with missing values. fillna() replaces
+missing values.
+
+Q7. What is the difference between mean, median and mode? A. Mean is the
+average, median is the middle value, and mode is the most frequent
+value.
+
+Q8. What is the difference between object and int64? A. object commonly
+stores text or mixed values; int64 stores integers.
+
+Q9. What is the difference between fit(), transform() and
+fit_transform()? A. fit() learns parameters. transform() applies learned
+parameters. fit_transform() learns and applies the transformation.
+
+Q10. What is overfitting? A. Overfitting occurs when a model learns the
+training data too closely and performs poorly on unseen data.
+
+Q11. What is supervised learning? A. It is machine learning using
+labelled data, where the target output is known during training.
+
+Q12. What is unsupervised learning? A. It is machine learning that finds
+patterns in data without target labels.
+
+Q13. What is regression? A. Regression predicts a continuous numerical
+value.
+
+Q14. What is classification? A. Classification predicts a category or
+class label.
+
+Q15. What is the difference between correlation and causation? A.
+Correlation describes association between variables. Causation means one
+variable directly produces a change in another.
+
+Q16. What is an outlier? A. An observation that is unusually far from
+the majority of the data.
+
+Q17. What is standardization? A. It transforms numerical features to a
+common scale, often with mean 0 and standard deviation 1.
+
+Q18. What is one-hot encoding? A. It converts categories into separate
+binary columns.
+
+Q19. What is data leakage? A. It occurs when information that should be
+unavailable during training influences model development or evaluation.
+
+Q20. Why do we visualize data? A. Visualization helps identify trends,
+patterns, differences, distributions and possible outliers.
+
