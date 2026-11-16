@@ -1,0 +1,282 @@
+
+# Practical 4: Spam Filtering Using KNN
+
+# Install required libraries before running (if not installed):
+# pip install pandas numpy matplotlib seaborn scikit-learn
+
+
+# Step 1: Import required libraries
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Import function to split dataset into training and testing sets
+from sklearn.model_selection import train_test_split
+
+# Convert text messages into numerical features using TF-IDF
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Import K-Nearest Neighbors classification algorithm
+from sklearn.neighbors import KNeighborsClassifier
+
+# Import evaluation metrics to check model performance
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    classification_report
+)
+
+# Import Pipeline to combine multiple ML steps
+from sklearn.pipeline import Pipeline
+
+
+# Step 2: Load SMS Spam Collection dataset
+
+# Read the dataset
+# sep="\t" means values are separated by tabs
+# header=None means the dataset has no column headings
+# names assigns column names manually
+data = pd.read_csv(
+    "SMSSpamCollection",
+    sep="\t",
+    header=None,
+    names=["label", "message"]
+)
+
+# Display the first 5 records
+print("Dataset:")
+print(data.head())
+
+# Display the number of rows and columns
+print("\nDataset Shape:")
+print(data.shape)
+
+
+# Step 3: Check missing values
+
+# Check the number of missing values in each column
+print("\nMissing Values:")
+print(data.isnull().sum())
+
+# Remove rows containing missing values
+inplace=True
+data.dropna(inplace=True)
+
+
+# Step 4: Display class distribution
+
+# Count the number of Spam and Ham messages
+print("\nSpam and Ham Count:")
+print(data["label"].value_counts())
+
+
+# Step 5: Convert labels into numerical values
+
+# Convert text labels into numbers
+# Ham = 0 (Not Spam)
+# Spam = 1 (Spam)
+data["label"] = data["label"].map({
+    "ham": 0,
+    "spam": 1
+})
+
+
+# Step 6: Separate features and labels
+
+# X contains input SMS messages
+X = data["message"]
+
+# y contains output labels (0 or 1)
+y = data["label"]
+
+
+# Step 7: Split dataset into training and testing data
+
+# 80% data is used for training
+# 20% data is used for testing
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+# Display the size of training and testing datasets
+print("\nTraining Data Shape:", X_train.shape)
+print("Testing Data Shape:", X_test.shape)
+
+
+# Step 8: Create KNN classification pipeline
+
+# Pipeline combines text conversion and KNN classification
+model = Pipeline([
+
+    # Convert text messages into numerical TF-IDF features
+    ("tfidf", TfidfVectorizer(
+        stop_words="english"
+    )),
+
+    # Apply K-Nearest Neighbors algorithm
+    ("knn", KNeighborsClassifier(
+        n_neighbors=5,   # Consider 5 nearest neighbors
+        metric="cosine", # Use cosine distance to measure similarity
+        algorithm="brute" # Compare with all training samples
+    ))
+])
+
+
+# Step 9: Train the KNN model
+
+# Learn patterns from training messages and their labels
+model.fit(X_train, y_train)
+
+print("\nKNN Model Trained Successfully!")
+
+
+# Step 10: Predict test data
+
+# Predict whether each test message is Spam or Ham
+y_pred = model.predict(X_test)
+
+
+# Step 11: Calculate accuracy
+
+# Compare actual labels with predicted labels
+accuracy = accuracy_score(y_test, y_pred)
+
+# Display model accuracy in percentage
+print("\nModel Accuracy:")
+print(accuracy * 100, "%")
+
+
+# Step 12: Display classification report
+
+# Display precision, recall, F1-score and support
+print("\nClassification Report:")
+
+print(classification_report(
+    y_test,
+    y_pred,
+    target_names=["Ham", "Spam"]
+))
+
+
+# Step 13: Generate confusion matrix
+
+# Compare actual and predicted classifications
+cm = confusion_matrix(y_test, y_pred)
+
+# Display confusion matrix
+print("\nConfusion Matrix:")
+print(cm)
+
+
+# Step 14: Visualize confusion matrix
+
+# Set the figure size of the graph
+plt.figure(figsize=(6, 4))
+
+# Create a heatmap of the confusion matrix
+sns.heatmap(
+    cm,
+    annot=True,          # Display values inside each box
+    fmt="d",             # Display values as integers
+    cmap="Blues",        # Set blue color theme
+    xticklabels=["Ham", "Spam"],
+    yticklabels=["Ham", "Spam"]
+)
+
+# Set X-axis and Y-axis labels
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+
+# Set graph title
+plt.title("Spam Classification Confusion Matrix")
+
+# Display the graph
+plt.show()
+
+
+# Step 15: Test a new message
+
+# Create a new SMS message for prediction
+new_message = [
+    "Congratulations! You have won a free prize. Claim now!"
+]
+
+# Predict whether the new message is Spam or Ham
+prediction = model.predict(new_message)
+
+# Display the entered message
+print("\nNew Message:", new_message[0])
+
+# Check the prediction result
+if prediction[0] == 1:
+
+    # 1 represents Spam
+    print("Prediction: SPAM")
+
+else:
+
+    # 0 represents Ham (Not Spam)
+    print("Prediction: HAM (Not Spam)")
+
+
+
+
+
+OUTPUT:
+
+
+
+
+Dataset:
+  label                                            message
+0   ham  Go until jurong point, crazy.. Available only ...
+1   ham                      Ok lar... Joking wif u oni...
+2  spam  Free entry in 2 a wkly comp to win FA Cup fina...
+3   ham  U dun say so early hor... U c already then say...
+4   ham  Nah I don't think he goes to usf, he lives aro...
+
+Dataset Shape:
+(5572, 2)
+
+Missing Values:
+label      0
+message    0
+dtype: int64
+
+Spam and Ham Count:
+label
+ham     4825
+spam     747
+Name: count, dtype: int64
+
+Training Data Shape: (4457,)
+Testing Data Shape: (1115,)
+
+KNN Model Trained Successfully!
+
+Model Accuracy:
+96.23318385650225 %
+
+Classification Report:
+              precision    recall  f1-score   support
+
+         Ham       0.96      1.00      0.98       966
+        Spam       0.98      0.73      0.84       149
+
+    accuracy                           0.96      1115
+   macro avg       0.97      0.86      0.91      1115
+weighted avg       0.96      0.96      0.96      1115
+
+
+Confusion Matrix:
+[[964   2]
+ [ 40 109]]
+
+
+New Message: Congratulations! You have won a free prize. Claim now!
+Prediction: SPAM

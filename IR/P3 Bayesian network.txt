@@ -1,0 +1,321 @@
+
+# Practical 3: Bayesian Network for Heart Disease Diagnosis
+
+# Install required libraries before running (if not installed):
+# pip install pandas numpy pgmpy
+
+# Step 1: Import required libraries
+import pandas as pd
+import numpy as np
+
+# Import classes required to create and perform inference
+# in a Discrete Bayesian Network
+from pgmpy.models import DiscreteBayesianNetwork
+from pgmpy.inference import VariableElimination
+
+
+# Step 2: Load Heart Disease dataset
+# Read the heart.csv file using pandas
+data = pd.read_csv("heart.csv")
+
+# Display the first 5 records of the dataset
+print("Sample instances from dataset:")
+print(data.head())
+
+# Display column names and their data types
+print("\nAttributes and datatypes:")
+print(data.dtypes)
+
+
+# Step 3: Handle missing values
+# Replace '?' values with NaN (Not a Number)
+# inplace=True modifies the original dataset
+data.replace("?", np.nan, inplace=True)
+
+# Identify the target column containing heart disease information
+# Different datasets may use different target column names
+if "heartdisease" in data.columns:
+    target = "heartdisease"
+elif "target" in data.columns:
+    target = "target"
+elif "HeartDisease" in data.columns:
+    target = "HeartDisease"
+else:
+    # Display an error if the target column is not found
+    raise ValueError("Heart disease target column not found!")
+
+# Convert target column values into numeric format
+# Invalid values are converted into NaN
+target_values = pd.to_numeric(
+    data[target], errors="coerce"
+)
+
+# Convert target values into binary form
+# 0 = No heart disease
+# 1 = Heart disease
+# Missing values remain NaN
+heart_disease = target_values.apply(
+    lambda x: 0 if x == 0 else (1 if pd.notna(x) else np.nan)
+)
+
+
+# Step 4: Select required attributes
+# Select important features needed for the Bayesian Network
+columns = [
+    "age", "sex", "cp", "exang",
+    "restecg", "chol"
+]
+
+# Check whether all required columns are available
+for col in columns:
+    if col not in data.columns:
+        raise ValueError(f"Missing column: {col}")
+
+# Create a separate dataset containing only selected columns
+processed_data = data[columns].copy()
+
+# Add the binary heart disease target column
+processed_data["heartdisease"] = heart_disease
+
+# Convert all selected attributes into numeric values
+# Invalid or non-numeric values are replaced with NaN
+for col in processed_data.columns:
+    processed_data[col] = pd.to_numeric(
+        processed_data[col], errors="coerce"
+    )
+
+# Remove rows containing missing values
+processed_data.dropna(inplace=True)
+
+
+# Step 5: Discretize continuous attributes
+# Age and cholesterol are continuous numerical attributes
+continuous_columns = ["age", "chol"]
+
+# Convert continuous values into 3 categories (bins)
+for col in continuous_columns:
+    processed_data[col] = pd.qcut(
+        processed_data[col],
+        q=3,               # Divide data into 3 quantile groups
+        labels=False,      # Assign integer labels (0, 1, 2)
+        duplicates="drop"  # Drop duplicate bin boundaries
+    )
+
+# Convert all dataset values into integer format
+data = processed_data.astype(int)
+
+# Display the preprocessed dataset
+print("\nPreprocessed Dataset:")
+print(data.head())
+
+
+# Step 6: Construct Bayesian Network
+# Define the relationships between different attributes
+# An arrow represents the dependency between two variables
+model = DiscreteBayesianNetwork([
+    ("age", "heartdisease"),
+    ("sex", "heartdisease"),
+    ("exang", "heartdisease"),
+    ("cp", "heartdisease"),
+    ("heartdisease", "restecg"),
+    ("heartdisease", "chol")
+])
+
+
+# Step 7: Learn Conditional Probability Distributions (CPDs)
+print("\nLearning CPDs using Maximum Likelihood Estimator")
+
+# Learn the probability distributions from the dataset
+# fit() uses Maximum Likelihood Estimation by default
+model = model.fit(data)
+
+print("\nCPDs learned successfully!")
+
+# Display all learned Conditional Probability Distributions
+for cpd in model.get_cpds():
+    print(cpd)
+
+
+# Step 8: Check Bayesian Network
+print("\nChecking Bayesian Network:")
+
+# Check whether the network structure and CPDs are valid
+# Returns True if the model is valid
+print(model.check_model())
+
+
+# Step 9: Perform inference
+print("\nInferencing with Bayesian Network:")
+
+# Create an inference object using Variable Elimination
+inference = VariableElimination(model)
+
+
+# Query 1: Probability of heart disease given restecg=1
+print("\n1. Probability of Heart Disease given restecg=1")
+
+# Calculate the probability of heart disease
+# when the restecg attribute has value 1
+q1 = inference.query(
+    variables=["heartdisease"],
+    evidence={"restecg": 1}
+)
+
+# Display the probability result
+print(q1)
+
+
+# Query 2: Probability of heart disease given cp=2
+print("\n2. Probability of Heart Disease given cp=2")
+
+# Calculate the probability of heart disease
+# when the chest pain (cp) attribute has value 2
+q2 = inference.query(
+    variables=["heartdisease"],
+    evidence={"cp": 2}
+)
+
+# Display the probability result
+print(q2)
+
+
+# Display successful execution message
+print("\nBayesian Network execution completed successfully!")
+
+
+
+
+
+
+OUTPUT:
+
+
+
+
+Sample instances from dataset:
+   age  sex  cp  trestbps  chol  fbs  restecg  thalach  exang  oldpeak  slope  \
+0   63    1   1       145   233    1        2      150      0      2.3      3   
+1   67    1   4       160   286    0        2      108      1      1.5      2   
+2   67    1   4       120   229    0        2      129      1      2.6      2   
+3   37    1   3       130   250    0        0      187      0      3.5      3   
+4   41    0   2       130   204    0        2      172      0      1.4      1   
+
+  ca thal  heartdisease  
+0  0    6             0  
+1  3    3             2  
+2  2    7             1  
+3  0    3             0  
+4  0    3             0  
+
+Attributes and datatypes:
+age               int64
+sex               int64
+cp                int64
+trestbps          int64
+chol              int64
+fbs               int64
+restecg           int64
+thalach           int64
+exang             int64
+oldpeak         float64
+slope             int64
+ca               object
+thal             object
+heartdisease      int64
+dtype: object
+
+Preprocessed Dataset:
+   age  sex  cp  exang  restecg  chol  heartdisease
+0    2    1   1      0        2     1             0
+1    2    1   4      1        2     2             1
+2    2    1   4      1        2     1             1
+3    0    1   3      0        0     1             0
+4    0    0   2      0        2     0             0
+
+Learning CPDs using Maximum Likelihood Estimator
+
+CPDs learned successfully!
+
+Conditional Probability Distributions:
++--------+----------+
+| age(0) | 0.349835 |
++--------+----------+
+| age(1) | 0.349835 |
++--------+----------+
+| age(2) | 0.30033  |
++--------+----------+
++-----------------+----------+--------------------+-----+---------------------+---------------------+
+| age             | age(0)   | age(0)             | ... | age(2)              | age(2)              |
++-----------------+----------+--------------------+-----+---------------------+---------------------+
+| cp              | cp(1)    | cp(1)              | ... | cp(4)               | cp(4)               |
++-----------------+----------+--------------------+-----+---------------------+---------------------+
+| exang           | exang(0) | exang(0)           | ... | exang(1)            | exang(1)            |
++-----------------+----------+--------------------+-----+---------------------+---------------------+
+| sex             | sex(0)   | sex(1)             | ... | sex(0)              | sex(1)              |
++-----------------+----------+--------------------+-----+---------------------+---------------------+
+| heartdisease(0) | 0.5      | 0.6666666666666666 | ... | 0.16666666666666666 | 0.05263157894736842 |
++-----------------+----------+--------------------+-----+---------------------+---------------------+
+| heartdisease(1) | 0.5      | 0.3333333333333333 | ... | 0.8333333333333334  | 0.9473684210526315  |
++-----------------+----------+--------------------+-----+---------------------+---------------------+
++--------+----------+
+| sex(0) | 0.320132 |
++--------+----------+
+| sex(1) | 0.679868 |
++--------+----------+
++----------+----------+
+| exang(0) | 0.673267 |
++----------+----------+
+| exang(1) | 0.326733 |
++----------+----------+
++-------+-----------+
+| cp(1) | 0.0759076 |
++-------+-----------+
+| cp(2) | 0.165017  |
++-------+-----------+
+| cp(3) | 0.283828  |
++-------+-----------+
+| cp(4) | 0.475248  |
++-------+-----------+
++--------------+----------------------+---------------------+
+| heartdisease | heartdisease(0)      | heartdisease(1)     |
++--------------+----------------------+---------------------+
+| restecg(0)   | 0.5792682926829268   | 0.4028776978417266  |
++--------------+----------------------+---------------------+
+| restecg(1)   | 0.006097560975609756 | 0.02158273381294964 |
++--------------+----------------------+---------------------+
+| restecg(2)   | 0.4146341463414634   | 0.5755395683453237  |
++--------------+----------------------+---------------------+
++--------------+---------------------+---------------------+
+| heartdisease | heartdisease(0)     | heartdisease(1)     |
++--------------+---------------------+---------------------+
+| chol(0)      | 0.3902439024390244  | 0.2733812949640288  |
++--------------+---------------------+---------------------+
+| chol(1)      | 0.32926829268292684 | 0.33093525179856115 |
++--------------+---------------------+---------------------+
+| chol(2)      | 0.2804878048780488  | 0.39568345323741005 |
++--------------+---------------------+---------------------+
+
+Checking Bayesian Network:
+True
+
+Inferencing with Bayesian Network:
+
+1. Probability of Heart Disease given restecg=1
++-----------------+---------------------+
+| heartdisease    |   phi(heartdisease) |
++=================+=====================+
+| heartdisease(0) |              0.2617 |
++-----------------+---------------------+
+| heartdisease(1) |              0.7383 |
++-----------------+---------------------+
+
+2. Probability of Heart Disease given cp=2
++-----------------+---------------------+
+| heartdisease    |   phi(heartdisease) |
++=================+=====================+
+| heartdisease(0) |              0.7394 |
++-----------------+---------------------+
+| heartdisease(1) |              0.2606 |
++-----------------+---------------------+
+
+Bayesian Network execution completed successfully!

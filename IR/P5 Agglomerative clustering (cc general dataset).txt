@@ -1,0 +1,371 @@
+
+# Practical 5: Agglomerative Hierarchical Clustering
+
+# Step 1: Import required libraries
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# StandardScaler is used to standardize data
+# MinMaxScaler is used to normalize data
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+# PCA is used for dimensionality reduction
+from sklearn.decomposition import PCA
+
+# AgglomerativeClustering performs hierarchical clustering
+from sklearn.cluster import AgglomerativeClustering
+
+# silhouette_score evaluates the quality of clusters
+from sklearn.metrics import silhouette_score
+
+# Import functions to create dendrogram and linkage
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+
+# Step 2: Load the dataset
+
+# Read the Credit Card General dataset
+data = pd.read_csv("CC GENERAL.csv")
+
+# Display the first 5 records
+print("First 5 Records:")
+print(data.head())
+
+# Display the number of rows and columns
+print("\nDataset Shape:")
+print(data.shape)
+
+# Check missing values in each column
+print("\nMissing Values:")
+print(data.isnull().sum())
+
+
+# Step 3: Data preprocessing
+
+# Remove customer ID because it is not useful for clustering
+# axis=1 means column-wise deletion
+data.drop("CUST_ID", axis=1, inplace=True)
+
+# Replace missing values with the median of each column
+# Median is less affected by extreme values
+data.fillna(data.median(), inplace=True)
+
+# Check total missing values after preprocessing
+print("\nMissing values after preprocessing:")
+print(data.isnull().sum().sum())
+
+
+# Step 4: Standardization
+
+# Create a StandardScaler object
+scaler = StandardScaler()
+
+# Standardize the dataset
+# This converts values to a common scale
+scaled_data = scaler.fit_transform(data)
+
+print("\nData Standardized Successfully!")
+
+
+# Step 5: Normalization
+
+# Create a MinMaxScaler object
+normalizer = MinMaxScaler()
+
+# Normalize the standardized data
+# Values are scaled between 0 and 1
+normalized_data = normalizer.fit_transform(scaled_data)
+
+print("Data Normalized Successfully!")
+
+
+# Step 6: Apply PCA for dimensionality reduction
+
+# Create a PCA object with 2 principal components
+# This reduces the data to 2 dimensions
+pca = PCA(n_components=2)
+
+# Apply PCA to the normalized data
+pca_data = pca.fit_transform(normalized_data)
+
+print("\nPCA Applied Successfully!")
+
+# Display the shape of PCA-transformed data
+print("PCA Data Shape:", pca_data.shape)
+
+# Display the variance explained by each component
+print("Explained Variance Ratio:")
+print(pca.explained_variance_ratio_)
+
+
+# Step 7: Draw Dendrogram
+
+# Select a sample of maximum 500 records
+# This makes dendrogram computation faster
+sample_size = min(500, len(pca_data))
+
+# Set random seed for reproducible results
+np.random.seed(42)
+
+# Randomly select sample indices without repetition
+sample_indices = np.random.choice(
+    len(pca_data), sample_size, replace=False
+)
+
+# Select the corresponding PCA data
+sample_data = pca_data[sample_indices]
+
+# Calculate linkage using Ward's method
+# Ward's method minimizes within-cluster variance
+linked = linkage(sample_data, method="ward")
+
+# Set the size of the dendrogram figure
+plt.figure(figsize=(12, 6))
+
+# Draw the dendrogram
+dendrogram(linked)
+
+# Set graph title and axis labels
+plt.title("Dendrogram - Agglomerative Hierarchical Clustering")
+plt.xlabel("Data Points")
+plt.ylabel("Euclidean Distance")
+
+# Display the dendrogram
+plt.show()
+
+
+# Step 8: Find the best number of clusters using Silhouette Score
+
+# Select a maximum of 2000 records for clustering
+# This reduces computation time
+cluster_size = min(2000, len(pca_data))
+
+# Randomly select records for clustering
+cluster_indices = np.random.choice(
+    len(pca_data), cluster_size, replace=False
+)
+
+# Store the selected PCA data
+cluster_data = pca_data[cluster_indices]
+
+# Create an empty list to store silhouette scores
+silhouette_scores = []
+
+# Test different numbers of clusters from 2 to 5
+for k in range(2, 6):
+
+    # Create an Agglomerative Clustering model
+    model = AgglomerativeClustering(
+        n_clusters=k,    # Number of clusters
+        linkage="ward"   # Use Ward's linkage method
+    )
+
+    # Fit the model and assign cluster labels
+    labels = model.fit_predict(cluster_data)
+
+    # Calculate the Silhouette Score
+    # Higher score indicates better-separated clusters
+    score = silhouette_score(cluster_data, labels)
+
+    # Store the calculated score
+    silhouette_scores.append(score)
+
+    # Display number of clusters and corresponding score
+    print("Number of Clusters:", k,
+          "Silhouette Score:", score)
+
+
+# Step 9: Plot Silhouette Scores
+
+# Set the size of the graph
+plt.figure(figsize=(8, 5))
+
+# Plot silhouette scores for different cluster counts
+# marker="o" displays circular points
+plt.plot(range(2, 6), silhouette_scores, marker="o")
+
+# Set graph title and axis labels
+plt.title("Silhouette Score for Different Clusters")
+plt.xlabel("Number of Clusters")
+plt.ylabel("Silhouette Score")
+
+# Display cluster numbers on X-axis
+plt.xticks(range(2, 6))
+
+# Display grid lines
+plt.grid(True)
+
+# Show the graph
+plt.show()
+
+
+# Select the number of clusters having the highest score
+# argmax() returns the index of the maximum score
+best_k = range(2, 6)[np.argmax(silhouette_scores)]
+
+print("\nBest Number of Clusters:", best_k)
+
+
+# Step 10: Apply Agglomerative Clustering
+
+# Create the final clustering model
+# Use the best number of clusters obtained above
+final_model = AgglomerativeClustering(
+    n_clusters=best_k,
+    linkage="ward"
+)
+
+# Fit the model and assign final cluster labels
+final_labels = final_model.fit_predict(cluster_data)
+
+print("\nAgglomerative Clustering Completed!")
+
+
+# Step 11: Visualize the clusters using PCA
+
+# Set the size of the scatter plot
+plt.figure(figsize=(8, 5))
+
+# Plot the data points based on their PCA components
+plt.scatter(
+    cluster_data[:, 0],   # First principal component
+    cluster_data[:, 1],   # Second principal component
+    c=final_labels,       # Assign different colors to clusters
+    cmap="rainbow",       # Use different colors for clusters
+    s=15                  # Set point size
+)
+
+# Set graph title and axis labels
+plt.title("Agglomerative Clustering - Customer Segmentation")
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+
+# Display the cluster visualization
+plt.show()
+
+
+# Step 12: Display cluster distribution
+
+print("\nCluster Distribution:")
+
+# Count the number of records in each cluster
+# value_counts() counts records in each cluster
+# sort_index() arranges cluster labels in order
+print(pd.Series(final_labels).value_counts().sort_index())
+
+
+# Step 13: Calculate final Silhouette Score
+
+# Calculate the final clustering quality score
+final_score = silhouette_score(cluster_data, final_labels)
+
+# Display the final Silhouette Score
+print("\nFinal Silhouette Score:", final_score)
+
+
+# Display successful execution message
+print("\nPractical 5 Completed Successfully!")
+
+
+
+
+
+OUTPUT:
+
+
+
+
+First 5 Records:
+  CUST_ID      BALANCE  BALANCE_FREQUENCY  PURCHASES  ONEOFF_PURCHASES  \
+0  C10001    40.900749           0.818182      95.40              0.00   
+1  C10002  3202.467416           0.909091       0.00              0.00   
+2  C10003  2495.148862           1.000000     773.17            773.17   
+3  C10004  1666.670542           0.636364    1499.00           1499.00   
+4  C10005   817.714335           1.000000      16.00             16.00   
+
+   INSTALLMENTS_PURCHASES  CASH_ADVANCE  PURCHASES_FREQUENCY  \
+0                    95.4      0.000000             0.166667   
+1                     0.0   6442.945483             0.000000   
+2                     0.0      0.000000             1.000000   
+3                     0.0    205.788017             0.083333   
+4                     0.0      0.000000             0.083333   
+
+   ONEOFF_PURCHASES_FREQUENCY  PURCHASES_INSTALLMENTS_FREQUENCY  \
+0                    0.000000                          0.083333   
+1                    0.000000                          0.000000   
+2                    1.000000                          0.000000   
+3                    0.083333                          0.000000   
+4                    0.083333                          0.000000   
+
+   CASH_ADVANCE_FREQUENCY  CASH_ADVANCE_TRX  PURCHASES_TRX  CREDIT_LIMIT  \
+0                0.000000                 0              2        1000.0   
+1                0.250000                 4              0        7000.0   
+2                0.000000                 0             12        7500.0   
+3                0.083333                 1              1        7500.0   
+4                0.000000                 0              1        1200.0   
+
+      PAYMENTS  MINIMUM_PAYMENTS  PRC_FULL_PAYMENT  TENURE  
+0   201.802084        139.509787          0.000000      12  
+1  4103.032597       1072.340217          0.222222      12  
+2   622.066742        627.284787          0.000000      12  
+3     0.000000               NaN          0.000000      12  
+4   678.334763        244.791237          0.000000      12  
+
+Dataset Shape:
+(8950, 18)
+
+Missing Values:
+CUST_ID                               0
+BALANCE                               0
+BALANCE_FREQUENCY                     0
+PURCHASES                             0
+ONEOFF_PURCHASES                      0
+INSTALLMENTS_PURCHASES                0
+CASH_ADVANCE                          0
+PURCHASES_FREQUENCY                   0
+ONEOFF_PURCHASES_FREQUENCY            0
+PURCHASES_INSTALLMENTS_FREQUENCY      0
+CASH_ADVANCE_FREQUENCY                0
+CASH_ADVANCE_TRX                      0
+PURCHASES_TRX                         0
+CREDIT_LIMIT                          1
+PAYMENTS                              0
+MINIMUM_PAYMENTS                    313
+PRC_FULL_PAYMENT                      0
+TENURE                                0
+dtype: int64
+
+Missing values after preprocessing:
+0
+
+Data Standardized Successfully!
+Data Normalized Successfully!
+
+PCA Applied Successfully!
+PCA Data Shape: (8950, 2)
+Explained Variance Ratio:
+[0.49597096 0.14054119]
+
+Number of Clusters: 2 Silhouette Score: 0.574791398245153
+Number of Clusters: 3 Silhouette Score: 0.5759527591673459
+Number of Clusters: 4 Silhouette Score: 0.4731339384295362
+Number of Clusters: 5 Silhouette Score: 0.46067301258504084
+
+
+Best Number of Clusters: 3
+
+Agglomerative Clustering Completed!
+
+
+Cluster Distribution:
+0    1078
+1     627
+2     295
+Name: count, dtype: int64
+
+Final Silhouette Score: 0.5759527591673459
+
+Practical 5 Completed Successfully!

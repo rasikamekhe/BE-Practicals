@@ -1,0 +1,124 @@
+
+# Practical 6: PageRank Algorithm
+
+# Import NumPy library
+import numpy as np
+
+# Step 1: Define web pages and their links
+# Each page contains a list of pages to which it links
+pages = ["A", "B", "C", "D"]
+
+graph = {
+    "A": ["B", "C"],  # A links to B and C
+    "B": ["C"],       # B links to C
+    "C": ["A"],       # C links to A
+    "D": ["C"]        # D links to C
+}
+
+# Step 2: Initialize PageRank values
+N = len(pages)  # Total number of web pages
+
+# Damping factor represents the probability of following a link
+damping_factor = 0.85
+
+# Initially, assign equal rank to every page
+page_rank = {
+    page: 1 / N for page in pages
+}
+
+# Step 3: Set the number of iterations
+iterations = 100
+
+# Step 4: Apply PageRank Algorithm
+for iteration in range(iterations):
+
+    # Dictionary to store updated ranks
+    new_rank = {}
+
+    # Calculate rank for each page
+    for page in pages:
+
+        # Store the total rank received from incoming links
+        rank_sum = 0
+
+        # Find incoming links to the current page
+        for other_page in pages:
+
+            # Check whether another page links to current page
+            if page in graph[other_page]:
+
+                # Count the outgoing links of that page
+                out_degree = len(graph[other_page])
+
+                # Avoid division by zero
+                if out_degree > 0:
+
+                    # Add the contribution of the incoming page
+                    rank_sum += (
+                        page_rank[other_page] / out_degree
+                    )
+
+        # Handle dangling pages (pages with no outgoing links)
+        dangling_rank = sum(
+            page_rank[p]
+            for p in pages
+            if len(graph[p]) == 0
+        )
+
+        # Calculate the new PageRank using the formula
+        new_rank[page] = (
+            (1 - damping_factor) / N
+            + damping_factor * (
+                rank_sum + dangling_rank / N
+            )
+        )
+
+    # Update all PageRank values after each iteration
+    page_rank = new_rank
+
+# Step 5: Display final PageRank values
+print("PageRank Values:\n")
+
+for page, rank in page_rank.items():
+    print(page, ":", round(rank, 6))
+
+# Step 6: Sort pages according to their PageRank
+sorted_pages = sorted(
+    page_rank.items(),
+    key=lambda x: x[1],  # Sort using rank value
+    reverse=True         # Highest rank comes first
+)
+
+print("\nPages Ranked by Importance:\n")
+
+# Display pages in descending order of importance
+for page, rank in sorted_pages:
+    print(page, ":", round(rank, 6))
+
+# Step 7: Display the page having the highest rank
+print("\nMost Important Page:", sorted_pages[0][0])
+
+
+
+
+
+OUTPUT:
+
+
+
+
+PageRank Values:
+
+A : 0.372527
+B : 0.195824
+C : 0.394149
+D : 0.0375
+
+Pages Ranked by Importance:
+
+C : 0.394149
+A : 0.372527
+B : 0.195824
+D : 0.0375
+
+Most Important Page: C

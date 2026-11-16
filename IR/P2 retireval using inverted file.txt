@@ -1,0 +1,121 @@
+
+# Practical 2: Document Retrieval Using Inverted Files
+
+# Step 1: Import defaultdict from collections
+# defaultdict automatically creates an empty list for new keys
+from collections import defaultdict
+
+# Step 2: Create sample documents
+# Each document has a unique document ID and its text
+documents = {
+    1: "Information retrieval is important",
+    2: "Information retrieval uses indexing",
+    3: "Indexing improves document searching",
+    4: "Searching documents is easy"
+}
+
+# Step 3: Create an empty inverted index
+# It stores each word along with the list of document IDs
+# in which that word appears
+inverted_index = defaultdict(list)
+
+# Step 4: Build the inverted index
+# Iterate through each document ID and its text
+for doc_id, text in documents.items():
+
+    # Convert the document text into lowercase
+    text = text.lower()
+
+    # Split the text into individual words
+    words = text.split()
+
+    # Add each word to the inverted index
+    for word in words:
+
+        # Check whether the document ID is already present
+        if doc_id not in inverted_index[word]:
+
+            # If not present, add the document ID to its list
+            inverted_index[word].append(doc_id)
+
+# Step 5: Display the inverted index
+print("Inverted Index:")
+
+# Iterate through each word and its corresponding document IDs
+for word, doc_ids in inverted_index.items():
+    print(word, ":", doc_ids)
+
+# Step 6: Accept search query from the user
+# Convert the query into lowercase for matching
+query = input("\nEnter search query: ").lower()
+
+# Split the search query into individual words
+query_words = query.split()
+
+# Step 7: Retrieve documents containing all query words
+
+# Initially, result is None because no word is processed yet
+result = None
+
+# Check each word in the search query
+for word in query_words:
+
+    # Get the document IDs containing the current word
+    # If the word is not found, return an empty list
+    # set() removes duplicate document IDs
+    doc_ids = set(inverted_index.get(word, []))
+
+    # Find documents common to all query words
+    if result is None:
+
+        # For the first word, store its document IDs
+        result = doc_ids
+
+    else:
+
+        # For the remaining words, find common document IDs
+        # intersection() returns only IDs present in both sets
+        result = result.intersection(doc_ids)
+
+# Step 8: Display the retrieved documents
+print("\nRetrieved Documents:")
+
+# Check whether any matching documents are found
+if result:
+
+    # Sort the document IDs and display matching documents
+    for doc_id in sorted(result):
+        print("Document", doc_id, ":", documents[doc_id])
+
+else:
+
+    # Display message if no matching documents are found
+    print("No matching documents found.")
+
+
+
+
+
+OUTPUT:
+
+
+
+
+Inverted Index:
+information : [1, 2]
+retrieval : [1, 2]
+is : [1, 4]
+important : [1]
+uses : [2]
+indexing : [2, 3]
+improves : [3]
+document : [3]
+searching : [3, 4]
+documents : [4]
+easy : [4]
+
+Enter search query:  information retrieval
+
+Retrieved Documents:
+Document 1 : Information retrieval is important
+Document 2 : Information retrieval uses indexing

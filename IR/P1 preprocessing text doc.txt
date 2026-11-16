@@ -1,0 +1,80 @@
+
+# Practical 1: Text Document Preprocessing
+
+# Step 1: Import required libraries
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import wordpunct_tokenize
+from nltk.stem import PorterStemmer
+
+# Step 2: Check whether English stopwords are available
+try:
+    stopwords.words('english')  # Load English stopwords
+except LookupError:
+    nltk.download('stopwords')  # Download if not already available
+
+# Step 3: Accept text input from the user
+text = input("Enter the text: ")
+
+# Step 4: Convert the entire text into lowercase
+# This maintains uniformity between uppercase and lowercase words
+text = text.lower()
+
+# Step 5: Tokenization - Split text into individual words
+words = wordpunct_tokenize(text)
+
+# Remove punctuation marks and numbers
+# isalpha() keeps only tokens containing alphabetic characters
+words = [word for word in words if word.isalpha()]
+
+# Display the original tokens after cleaning
+print("\nOriginal Tokens:")
+print(words)
+
+# Step 6: Stopword Removal
+# Load all English stopwords and store them in a set
+stop_words = set(stopwords.words('english'))
+
+# Remove common words like is, an, the, of, etc.
+# Keep only those words which are not present in stop_words
+filtered_words = [
+    word for word in words
+    if word not in stop_words
+]
+
+# Display words after stopword removal
+print("\nAfter Stopword Removal:")
+print(filtered_words)
+
+# Step 7: Stemming using Porter Stemmer
+# Create an object of PorterStemmer
+ps = PorterStemmer()
+
+# Convert each filtered word into its root/stem form
+# stem() removes common suffixes from words
+stemmed_words = [
+    ps.stem(word) for word in filtered_words
+]
+
+# Display the final stemmed words
+print("\nAfter Stemming:")
+print(stemmed_words)
+
+
+
+
+OUTPUT:
+
+
+
+
+Enter the text:  Information Retrieval is an important field of computer science.
+
+Original Tokens:
+['information', 'retrieval', 'is', 'an', 'important', 'field', 'of', 'computer', 'science']
+
+After Stopword Removal:
+['information', 'retrieval', 'important', 'field', 'computer', 'science']
+
+After Stemming:
+['inform', 'retriev', 'import', 'field', 'comput', 'scienc']
