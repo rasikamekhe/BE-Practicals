@@ -1,0 +1,326 @@
+CODE:
+
+
+
+# Step 1: Install the required libraries
+%pip install qiskit qiskit-aer matplotlib scipy
+
+
+# Step 2: Import required libraries
+
+import numpy as np
+# NumPy is used for mathematical calculations and arrays.
+
+import matplotlib.pyplot as plt
+# Matplotlib is used to plot the benchmarking results.
+
+from qiskit import QuantumCircuit, transpile
+# QuantumCircuit is used to create quantum circuits.
+# transpile converts the circuit into instructions supported by the simulator.
+
+from qiskit.quantum_info import random_clifford
+# random_clifford generates random Clifford quantum gates.
+
+from qiskit_aer import AerSimulator
+# AerSimulator simulates the execution of quantum circuits.
+
+from qiskit_aer.noise import NoiseModel, depolarizing_error
+# NoiseModel defines errors in the simulator.
+# depolarizing_error introduces depolarizing noise.
+
+from scipy.optimize import curve_fit
+# curve_fit fits an exponential curve to the experimental results.
+
+
+# Step 3: Define parameters
+
+sequence_lengths = [0, 1, 2, 4, 8, 16, 32, 64]
+# Number of random Clifford gates in each sequence.
+# Different lengths help us observe how errors increase with gate count.
+
+num_sequences = 100
+# Number of random sequences generated for each sequence length.
+
+shots = 2000
+# Each circuit is executed 2000 times to estimate its survival probability.
+
+rng = np.random.default_rng(42)
+# Creates a random number generator.
+# Seed 42 makes the random sequence generation reproducible.
+
+
+# Step 4: Create noise model
+
+noise_model = NoiseModel()
+# Create an empty noise model.
+
+# Apply 2% depolarizing noise to single-qubit U gates.
+error = depolarizing_error(0.02, 1)
+
+noise_model.add_all_qubit_quantum_error(error, ['u'])
+# Apply this noise to every single-qubit U gate.
+
+
+# Step 5: Create noisy quantum simulator
+
+simulator = AerSimulator(noise_model=noise_model)
+# Create a simulator that includes the defined noise.
+
+
+# Step 6: Store survival probabilities and error bars
+
+survival_probabilities = []
+# Stores the average probability of measuring 0 for each sequence length.
+
+standard_errors = []
+# Stores the standard error for each average probability.
+
+
+# Step 7: Perform Randomized Benchmarking
+
+for length in sequence_lengths:
+    # Repeat the experiment for every sequence length.
+
+    probabilities = []
+    # Stores probabilities obtained from individual random sequences.
+
+    for _ in range(num_sequences):
+        # Generate 100 random sequences for the current length.
+
+        # Create a quantum circuit with one qubit.
+        sequence_circuit = QuantumCircuit(1)
+
+        # Generate random Clifford gates.
+        for i in range(length):
+
+            clifford = random_clifford(
+                1,
+                seed=int(rng.integers(0, 2**31))
+            )
+            # Generate one random single-qubit Clifford operation.
+
+            sequence_circuit.compose(
+                clifford.to_circuit(),
+                inplace=True
+            )
+            # Add the generated Clifford gate to the sequence circuit.
+
+        # Calculate the inverse of the complete sequence.
+        inverse_circuit = sequence_circuit.inverse()
+        # The inverse reverses the effect of the original sequence.
+
+
+        # Create the final circuit with one qubit and one classical bit.
+        qc = QuantumCircuit(1, 1)
+
+        # Apply the random Clifford sequence.
+        qc.compose(sequence_circuit, inplace=True)
+
+        # Apply the inverse sequence.
+        qc.compose(inverse_circuit, inplace=True)
+        # Ideally, the original sequence and its inverse cancel each other.
+
+
+        # Measure the qubit.
+        qc.measure(0, 0)
+        # Store the measurement result in classical bit 0.
+
+
+        # Transpile without optimization.
+        compiled = transpile(
+            qc,
+            simulator,
+            basis_gates=['u'],
+            optimization_level=0
+        )
+        # Convert the circuit into U gates supported by the simulator.
+        # optimization_level=0 avoids circuit optimization.
+
+
+        # Execute the circuit.
+        result = simulator.run(
+            compiled,
+            shots=shots
+        ).result()
+        # Run the circuit 2000 times and collect the results.
+
+        counts = result.get_counts()
+        # Get the measurement counts.
+
+
+        # Calculate survival probability.
+        probability_zero = counts.get('0', 0) / shots
+        # Count how many times the output is 0.
+        # Divide by total shots to calculate the probability of returning to |0>.
+
+        probabilities.append(probability_zero)
+        # Store the probability for this random sequence.
+
+
+    # Calculate average survival probability.
+    average_probability = np.mean(probabilities)
+    # Find the mean probability across all 100 random sequences.
+
+
+    # Calculate standard error.
+    standard_error = (
+        np.std(probabilities, ddof=1) / np.sqrt(num_sequences)
+    )
+    # Standard deviation measures variation in the results.
+    # Standard error estimates uncertainty in the average probability.
+
+
+    survival_probabilities.append(average_probability)
+    # Store the average survival probability.
+
+    standard_errors.append(standard_error)
+    # Store the corresponding standard error.
+
+
+# Step 8: Display results
+
+print("Randomized Benchmarking Results")
+print("--------------------------------")
+
+for length, probability, error_value in zip(
+    sequence_lengths,
+    survival_probabilities,
+    standard_errors
+):
+    # Display the sequence length, average probability and error.
+
+    print(
+        f"Sequence Length: {length:2d} | "
+        f"Survival Probability: {probability:.4f} | "
+        f"Error: {error_value:.4f}"
+    )
+
+
+# Step 9: Define exponential decay model
+
+def rb_model(m, A, p, B):
+    return A * (p ** m) + B
+    # m = sequence length
+    # A = amplitude
+    # p = decay parameter
+    # B = constant offset
+
+
+# Step 10: Fit the benchmarking curve
+
+params, covariance = curve_fit(
+    rb_model,
+    np.array(sequence_lengths, dtype=float),
+    np.array(survival_probabilities),
+    p0=[0.5, 0.98, 0.5],
+    sigma=np.maximum(standard_errors, 1e-6),
+    absolute_sigma=True,
+    bounds=([0, 0, 0], [1, 1, 1]),
+    maxfev=20000
+)
+# Fit the exponential model to the measured probabilities.
+# p0 provides the initial parameter guesses.
+# sigma gives the uncertainty of each measurement.
+# bounds restrict the fitted parameters between 0 and 1.
+# maxfev sets the maximum number of fitting iterations.
+
+
+A, p, B = params
+# Extract the fitted amplitude, decay parameter and offset.
+
+
+# Calculate average Clifford error rate.
+
+error_rate = (1 - p) / 2
+# For a single qubit, calculate the average error rate
+# using the fitted decay parameter.
+
+
+print("\nEstimated Decay Parameter:", round(p, 5))
+
+print(
+    "Estimated Average Clifford Error Rate:",
+    round(error_rate * 100, 3), "%"
+)
+# Multiply by 100 to display the error rate as a percentage.
+
+
+# Step 11: Plot the results
+
+x_fit = np.linspace(
+    min(sequence_lengths),
+    max(sequence_lengths),
+    200
+)
+# Generate 200 points for drawing a smooth fitted curve.
+
+
+plt.figure(figsize=(9, 5))
+# Create a graph of width 9 and height 5.
+
+
+# Plot measured probabilities with error bars.
+
+plt.errorbar(
+    sequence_lengths,
+    survival_probabilities,
+    yerr=standard_errors,
+    fmt='o',
+    capsize=4,
+    label="Measured Survival Probability"
+)
+# Plot the actual measured values.
+# yerr displays the standard error bars.
+# fmt='o' displays the data points as circles.
+
+
+# Plot fitted exponential curve.
+
+plt.plot(
+    x_fit,
+    rb_model(x_fit, A, p, B),
+    label="Fitted RB Curve"
+)
+# Draw the exponential decay curve using fitted parameters.
+
+
+plt.xlabel("Sequence Length")
+# Label the X-axis.
+
+plt.ylabel("Survival Probability")
+# Label the Y-axis.
+
+plt.title("Randomized Benchmarking Protocol")
+# Set the graph title.
+
+plt.grid(True)
+# Display grid lines.
+
+plt.legend()
+# Display labels for both plotted lines.
+
+plt.tight_layout()
+# Adjust spacing so graph elements fit properly.
+
+plt.show()
+# Display the final graph.
+
+
+
+
+OUTPUT:
+
+
+Randomized Benchmarking Results
+--------------------------------
+Sequence Length:  0 | Survival Probability: 1.0000 | Error: 0.0000
+Sequence Length:  1 | Survival Probability: 0.9592 | Error: 0.0021
+Sequence Length:  2 | Survival Probability: 0.9184 | Error: 0.0026
+Sequence Length:  4 | Survival Probability: 0.8541 | Error: 0.0034
+Sequence Length:  8 | Survival Probability: 0.7444 | Error: 0.0032
+Sequence Length: 16 | Survival Probability: 0.6176 | Error: 0.0026
+Sequence Length: 32 | Survival Probability: 0.5294 | Error: 0.0014
+Sequence Length: 64 | Survival Probability: 0.5018 | Error: 0.0011
+
+Estimated Decay Parameter: 0.91474
+Estimated Average Clifford Error Rate: 4.263 %

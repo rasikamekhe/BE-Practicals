@@ -1,0 +1,126 @@
+CODE: 
+
+
+# Install the required libraries (run this separately in terminal)
+# pip install qiskit qiskit-aer matplotlib numpy
+
+
+# Step 1: Import required libraries
+from qiskit import QuantumCircuit, QuantumRegister
+from qiskit import ClassicalRegister, transpile
+from qiskit_aer import AerSimulator
+
+
+# Step 2: Create quantum and classical registers
+
+# Create 3 quantum bits (q0, q1, q2)
+# q0 = Original qubit (sender's qubit)
+# q1 = Sender's entangled qubit
+# q2 = Receiver's entangled qubit
+q = QuantumRegister(3, 'q')
+
+# Create 2 classical bits to store sender's measurement results
+m = ClassicalRegister(2, 'm')
+
+# Create 1 classical bit to store receiver's final output
+out = ClassicalRegister(1, 'out')
+
+# Combine all registers into one quantum circuit
+qc = QuantumCircuit(q, m, out)
+
+
+# Step 3: Prepare the original quantum state |1>
+
+# Apply X (NOT) gate to qubit 0
+# X gate changes the state from |0> to |1>
+# This is the quantum state that we want to teleport
+qc.x(0)
+
+
+# Step 4: Create an entangled Bell pair
+
+# Apply Hadamard gate to qubit 1
+# It creates a superposition of |0> and |1>
+qc.h(1)
+
+# Apply CNOT gate with qubit 1 as control and qubit 2 as target
+# This creates entanglement between qubits 1 and 2
+qc.cx(1, 2)
+
+
+# Step 5: Perform sender operations
+
+# Apply CNOT gate with qubit 0 as control and qubit 1 as target
+# This connects the original qubit with the entangled qubit
+qc.cx(0, 1)
+
+# Apply Hadamard gate to the original qubit (qubit 0)
+# This helps prepare the state for measurement
+qc.h(0)
+
+
+# Step 6: Measure sender's qubits
+
+# Measure qubit 0 and store its result in classical bit m[0]
+qc.measure(0, m[0])
+
+# Measure qubit 1 and store its result in classical bit m[1]
+qc.measure(1, m[1])
+
+# These two measurement results are used by the receiver
+# to determine which correction gates are required
+
+
+# Step 7: Apply receiver correction operations
+
+# If measurement result m[1] is 1, apply X gate to qubit 2
+# X gate changes |0> to |1> and |1> to |0>
+with qc.if_test((m[1], 1)):
+    qc.x(2)
+
+# If measurement result m[0] is 1, apply Z gate to qubit 2
+# Z gate changes the phase of the |1> state
+with qc.if_test((m[0], 1)):
+    qc.z(2)
+
+
+# Step 8: Measure the receiver's qubit
+
+# Measure qubit 2 and store the final result in out[0]
+# This tells us the state received after teleportation
+qc.measure(2, out[0])
+
+
+# Step 9: Create a quantum simulator
+
+# AerSimulator is used to simulate the quantum circuit
+simulator = AerSimulator()
+
+# Convert the circuit into simulator-compatible instructions
+compiled = transpile(qc, simulator)
+
+
+# Step 10: Execute the quantum circuit
+
+# Run the circuit 1000 times (shots=1000)
+# Each execution performs the quantum teleportation process
+result = simulator.run(
+    compiled, shots=1000
+).result()
+
+
+# Step 11: Get and display the results
+
+# Get the measurement counts from all 1000 executions
+counts = result.get_counts()
+
+# Display the quantum teleportation output
+print("Quantum Teleportation Output:")
+print(counts)
+
+
+# Step 12: Display the quantum circuit
+
+# Print the complete quantum circuit
+print("\nQuantum Circuit:")
+print(qc)

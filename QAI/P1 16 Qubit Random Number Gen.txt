@@ -1,0 +1,129 @@
+CODE:
+
+
+# Install the required libraries (run this separately in terminal)
+# pip install qiskit qiskit-aer matplotlib numpy
+
+
+# Import QuantumCircuit to create a quantum circuit
+# Import transpile to convert the circuit into simulator-compatible instructions
+from qiskit import QuantumCircuit, transpile
+
+# Import AerSimulator to simulate the quantum circuit
+from qiskit_aer import AerSimulator
+
+
+# Step 1: Create a quantum circuit with 16 qubits and 16 classical bits
+# 16 qubits are used to generate a 16-bit random binary number
+# Classical bits store the measurement results
+qc = QuantumCircuit(16, 16)
+
+
+# Step 2: Apply Hadamard (H) gate to all 16 qubits
+# Hadamard gate puts each qubit into an equal superposition of |0> and |1>
+# Therefore, each qubit has a 50% probability of producing 0 or 1
+qc.h(range(16))
+
+
+# Step 3: Measure all 16 qubits
+# Measurement converts quantum states into classical binary values
+# Each qubit's result is stored in its corresponding classical bit
+qc.measure(range(16), range(16))
+
+
+# Step 4: Create a quantum simulator
+# AerSimulator simulates the execution of the quantum circuit
+backend = AerSimulator()
+
+
+# Step 5: Execute the quantum circuit
+# Transpile converts the circuit into instructions supported by the simulator
+compiled_circuit = transpile(qc, backend)
+
+# Run the circuit only once (shots=1)
+# One execution generates one 16-bit random number
+job = backend.run(compiled_circuit, shots=1)
+
+
+# Step 6: Get the execution result
+print("Executing Job...\n")
+
+# Retrieve the result after circuit execution
+result = job.result()
+
+# Get the measurement counts
+# It returns the generated binary number and its frequency
+counts = result.get_counts()
+
+
+# Step 7: Display the generated random number
+print("RESULT:", counts)
+
+# Extract the generated 16-bit binary number from the result
+random_number = list(counts.keys())[0]
+
+# Display the generated random number
+print("\nGenerated 16-bit Random Number:", random_number)
+
+# Display the total number of bits
+print("Number of bits:", len(random_number))
+
+
+# Step 8: Display the quantum circuit
+print("\nQuantum Circuit:")
+
+# Draw and print the complete quantum circuit
+# It shows Hadamard gates and measurement operations
+print(qc.draw())
+
+
+
+
+OUTPUT:
+
+
+
+
+Executing Job...
+
+RESULT: {'1100000101011110': 1}
+
+Generated 16-bit Random Number: 1100000101011110
+Number of bits: 16
+
+Quantum Circuit:
+      ┌───┐┌─┐                                             
+ q_0: ┤ H ├┤M├─────────────────────────────────────────────
+      ├───┤└╥┘┌─┐                                          
+ q_1: ┤ H ├─╫─┤M├──────────────────────────────────────────
+      ├───┤ ║ └╥┘┌─┐                                       
+ q_2: ┤ H ├─╫──╫─┤M├───────────────────────────────────────
+      ├───┤ ║  ║ └╥┘┌─┐                                    
+ q_3: ┤ H ├─╫──╫──╫─┤M├────────────────────────────────────
+      ├───┤ ║  ║  ║ └╥┘┌─┐                                 
+ q_4: ┤ H ├─╫──╫──╫──╫─┤M├─────────────────────────────────
+      ├───┤ ║  ║  ║  ║ └╥┘┌─┐                              
+ q_5: ┤ H ├─╫──╫──╫──╫──╫─┤M├──────────────────────────────
+      ├───┤ ║  ║  ║  ║  ║ └╥┘┌─┐                           
+ q_6: ┤ H ├─╫──╫──╫──╫──╫──╫─┤M├───────────────────────────
+      ├───┤ ║  ║  ║  ║  ║  ║ └╥┘┌─┐                        
+ q_7: ┤ H ├─╫──╫──╫──╫──╫──╫──╫─┤M├────────────────────────
+      ├───┤ ║  ║  ║  ║  ║  ║  ║ └╥┘┌─┐                     
+ q_8: ┤ H ├─╫──╫──╫──╫──╫──╫──╫──╫─┤M├─────────────────────
+      ├───┤ ║  ║  ║  ║  ║  ║  ║  ║ └╥┘┌─┐                  
+ q_9: ┤ H ├─╫──╫──╫──╫──╫──╫──╫──╫──╫─┤M├──────────────────
+      ├───┤ ║  ║  ║  ║  ║  ║  ║  ║  ║ └╥┘┌─┐               
+q_10: ┤ H ├─╫──╫──╫──╫──╫──╫──╫──╫──╫──╫─┤M├───────────────
+      ├───┤ ║  ║  ║  ║  ║  ║  ║  ║  ║  ║ └╥┘┌─┐            
+q_11: ┤ H ├─╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫─┤M├────────────
+      ├───┤ ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║ └╥┘┌─┐         
+q_12: ┤ H ├─╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫─┤M├─────────
+      ├───┤ ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║ └╥┘┌─┐      
+q_13: ┤ H ├─╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫─┤M├──────
+      ├───┤ ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║ └╥┘┌─┐   
+q_14: ┤ H ├─╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫─┤M├───
+      ├───┤ ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║ └╥┘┌─┐
+q_15: ┤ H ├─╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫──╫─┤M├
+      └───┘ ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║ └╥┘
+c: 16/══════╩══╩══╩══╩══╩══╩══╩══╩══╩══╩══╩══╩══╩══╩══╩══╩═
+            0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15

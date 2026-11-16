@@ -1,0 +1,196 @@
+CODE:
+
+
+
+# Step 1: Install the required libraries
+%pip install qiskit qiskit-aer matplotlib
+
+
+# Step 2: Import required libraries
+
+from qiskit import QuantumCircuit, transpile
+# QuantumCircuit is used to create quantum circuits.
+# transpile converts the circuit into instructions supported by the simulator.
+
+from qiskit_aer import AerSimulator
+# AerSimulator is used to simulate the quantum circuit.
+
+from qiskit.visualization import plot_histogram
+# plot_histogram is used to display measurement results as a graph.
+
+import matplotlib.pyplot as plt
+# Matplotlib is used to display the histogram.
+
+
+# Step 3: Define number of qubits
+
+n = 5
+# We are performing QFT using 5 qubits.
+
+
+# Step 4: Create a quantum circuit
+
+qc = QuantumCircuit(n, n)
+# Create a quantum circuit with 5 quantum bits and 5 classical bits.
+# Classical bits store the measurement results.
+
+
+# Step 5: Prepare an input state
+
+# Apply X gates to create the binary state |00101>.
+qc.x(0)
+qc.x(2)
+# X gate changes |0> to |1>.
+# Applying X to qubits 0 and 2 prepares the required input state.
+
+
+# Step 6: Implement the 5-qubit Quantum Fourier Transform
+
+for j in range(n):
+    # Visit each qubit one by one.
+
+    # Apply Hadamard gate.
+    qc.h(j)
+    # Hadamard creates an equal superposition of |0> and |1>.
+
+    # Apply controlled phase rotation gates.
+    for k in range(j + 1, n):
+
+        angle = 2 * 3.141592653589793 / (2 ** (k - j + 1))
+        # Calculate the controlled phase rotation angle.
+        # The angle becomes smaller as the distance between qubits increases.
+
+        qc.cp(angle, k, j)
+        # Apply a controlled phase gate.
+        # Qubit k controls the phase rotation applied to qubit j.
+
+
+# Step 7: Reverse the qubit order using SWAP gates
+
+for i in range(n // 2):
+    qc.swap(i, n - i - 1)
+    # Swap the first qubit with the last,
+    # and the second qubit with the second-last.
+    # This reverses the qubit order.
+
+
+# Step 8: Add barrier
+
+qc.barrier()
+# Barrier separates the QFT operations from the measurement operations.
+# It also makes the circuit easier to read.
+
+
+# Step 9: Measure all qubits
+
+qc.measure(range(n), range(n))
+# Measure all 5 qubits.
+# Store each measurement in its corresponding classical bit.
+
+
+# Step 10: Display quantum circuit
+
+print("5-Qubit Quantum Fourier Transform Circuit:")
+print(qc.draw())
+# Display the complete quantum circuit.
+
+
+# Step 11: Create quantum simulator
+
+simulator = AerSimulator()
+# Create a simulator to execute the quantum circuit.
+
+
+# Step 12: Transpile circuit
+
+compiled_circuit = transpile(
+    qc,
+    simulator
+)
+# Convert the circuit into instructions supported by the simulator.
+
+
+# Step 13: Execute circuit
+
+result = simulator.run(
+    compiled_circuit,
+    shots=2048
+).result()
+# Execute the circuit 2048 times.
+# More shots give a better estimate of measurement probabilities.
+
+
+# Step 14: Get measurement results
+
+counts = result.get_counts()
+# Get the number of times each 5-bit output was measured.
+
+
+# Step 15: Display output
+
+print("\nQuantum Fourier Transform Results:")
+print("----------------------------------")
+
+print("Input State: |00101>")
+# Display the input quantum state.
+
+print("Number of Qubits:", n)
+# Display the number of qubits.
+
+print("Measurement Counts:", counts)
+# Display the measurement results.
+
+
+# Step 16: Plot measurement histogram
+
+plot_histogram(
+    counts,
+    title="5-Qubit Quantum Fourier Transform"
+)
+# Plot a histogram showing the frequency of each measurement outcome.
+
+
+plt.show()
+# Display the histogram.
+
+
+
+
+OUTPUT:
+
+
+
+
+5-Qubit Quantum Fourier Transform Circuit:
+     ┌───┐┌───┐                                                            »
+q_0: ┤ X ├┤ H ├─■────────■─────────────■─────────────────■─────────────────»
+     └───┘└───┘ │P(π/2)  │       ┌───┐ │                 │                 »
+q_1: ───────────■────────┼───────┤ H ├─┼────────■────────┼─────────■───────»
+     ┌───┐               │P(π/4) └───┘ │        │P(π/2)  │         │       »
+q_2: ┤ X ├───────────────■─────────────┼────────■────────┼─────────┼───────»
+     └───┘                             │P(π/8)           │         │P(π/4) »
+q_3: ──────────────────────────────────■─────────────────┼─────────■───────»
+                                                         │P(π/16)          »
+q_4: ────────────────────────────────────────────────────■─────────────────»
+                                                                           »
+c: 5/══════════════════════════════════════════════════════════════════════»
+                                                                           »
+«                                                            ░ ┌─┐            
+«q_0: ────────────────────────────────────────────────────X──░─┤M├────────────
+«                                                         │  ░ └╥┘┌─┐         
+«q_1: ──────■─────────────────────────────────────────X───┼──░──╫─┤M├─────────
+«     ┌───┐ │                                         │   │  ░  ║ └╥┘┌─┐      
+«q_2: ┤ H ├─┼────────■────────■───────────────────────┼───┼──░──╫──╫─┤M├──────
+«     └───┘ │        │P(π/2)  │       ┌───┐           │   │  ░  ║  ║ └╥┘┌─┐   
+«q_3: ──────┼────────■────────┼───────┤ H ├─■─────────X───┼──░──╫──╫──╫─┤M├───
+«           │P(π/8)           │P(π/4) └───┘ │P(π/2) ┌───┐ │  ░  ║  ║  ║ └╥┘┌─┐
+«q_4: ──────■─────────────────■─────────────■───────┤ H ├─X──░──╫──╫──╫──╫─┤M├
+«                                                   └───┘    ░  ║  ║  ║  ║ └╥┘
+«c: 5/══════════════════════════════════════════════════════════╩══╩══╩══╩══╩═
+«                                                               0  1  2  3  4 
+
+Quantum Fourier Transform Results:
+----------------------------------
+Input State: |00101>
+Number of Qubits: 5
+Measurement Counts: {'11101': 63, '11000': 70, '11010': 66, '01000': 72, '10101': 60, '11110': 56, '00010': 56, '01011': 59, '11001': 44, '10111': 66, '01101': 54, '00100': 66, '10011': 57, '01110': 73, '10100': 57, '11111': 75, '00111': 74, '01100': 68, '00001': 77, '00110': 64, '01111': 66, '01001': 76, '10110': 61, '11011': 63, '11100': 65, '10010': 60, '00101': 66, '10001': 58, '00011': 50, '01010': 79, '10000': 63, '00000': 64}
